@@ -10,3 +10,36 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/*Remueve márgenes generados automáticamente por el navegador */
+/** {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background-color: #00304E;
+}*/
+
+@layer base {
+    *,
+    *::before,
+    *::after {
+        padding: 0;
+        margin: 0;
+    }
+
+    body {
+        background-color: #00304E;
+    }
+
+    /* For Firefox. */
+    * {
+        scrollbar-width: none;
+    }
+
+    /* For WebKit (Chrome & Safari). */
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}

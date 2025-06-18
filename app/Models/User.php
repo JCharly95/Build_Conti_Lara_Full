@@ -12,25 +12,33 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    /** Nombre de la tabla asociada al modelo
+     * @var string */
+    protected $table = "usuarios";
+
+    /** Clave primaria de la tabla
+     * @var string */
+    protected $primaryKey = "ID_User";
+
+    /** Determinar si la tabla tendra timestamps en sus registros
+     * @var bool */
+    public $timestamps = false;
+
+    /** Los atributos que pueden ser asignados en consultas de datos masivas. (Y obtenidos si se hace un get)
+     * @var list<string> */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'Cod_User',
+        'Ape_Pat',
+        'Ape_Mat',
+        'Nombre',
+        'Correo',
+        'UltimoAcceso'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    /** Los atributos que deben ser ocultados para la serialización. (Ocultos en consultas get)
+     * @var list<string> */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'Contra'
     ];
 
     /**
