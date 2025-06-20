@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
-export default function MenuSelGraf({ setInfoSen }){
+export default function MenuSelGraf({ resSenSel }){
     // Establecer el arreglo de estado para almacenar los sensores registrados
     const [arrSenRegi, setArrSenRegi] = useState([]);
     // Crear la referencia hacia la lista para obtener la información de los elementos que la conforman
@@ -22,13 +22,13 @@ export default function MenuSelGraf({ setInfoSen }){
 
     /** Funcion para establecer el valor que el componente de la lista va a regresar como seleccionado
      * @param {string} valor Información del sensor o contenido del error durante el proceso */
-    const valRegreso = (valor) => ( setInfoSen(valor) );
+    const valRegreso = (valor) => ( resSenSel(valor) );
 
     /** Funcion para obtener la seleccion de la lista y establecer como dato a regresar, invocada mediante el evento onChange de la lista */
     const handleChange = () => ( valRegreso(listaSenRef.current.value) );
 
     return (
-        <select id="menuSelSensor" name="listaSenRegis" className="block w-full h-5/6 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 pl-1 cursor-pointer" onChange={handleChange} ref={listaSenRef}>
+        <select id="menuSelSensor" name="listaSenRegis" className="block w-full h-5/6 bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 pl-1 cursor-pointer" onChange={handleChange} ref={listaSenRef}>
             <option key="SenRegi0" value="Seleccione el sensor a buscar...">Seleccione el sensor a buscar...</option>
             { (arrSenRegi.length > 0 ) ? (arrSenRegi.map(
                     (sensor) => (

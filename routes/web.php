@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\SensorController;
+use App\Http\Controllers\Api\RegistroSensorController;
 use Inertia\Inertia;
 
 /* Rutas para renderizado general de las interfaces, peticiones get simples (los componentes de las paginas) sin parametros */
@@ -30,5 +31,8 @@ Route::get('/recuAcc', function(){
 // Ruta para validación del formulario de renovación de acceso
 Route::get('/valiSoliRecu', [UsuarioController::class, "buscarUsuarioRecu"]);
 
-// Ruta para establecer la lista de selección de sensores para la grafica
+// Ruta para obtener los registros de la lista de selección de sensores para la grafica
 Route::get('/listSenGraf', [SensorController::class, "listaSenRegi"]);
+
+// Ruta para consultar los registros de la grafica
+Route::get('/datosGraf', [RegistroSensorController::class, "listaRegistroEspeci"]);

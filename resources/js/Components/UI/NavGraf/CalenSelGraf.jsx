@@ -46,7 +46,7 @@ export default function CalenGrafica({ setFecha }){
     };
 
     return(
-        <section className="inline-flex ring-2 ring-inset ring-gray-400 rounded-md border-0 p-0.5">
+        <section className="inline-flex ring-2 ring-inset ring-gray-400 rounded-md border-0 p-0.5 bg-neutral-300">
             <label className="flex items-center justify-between text-black bg-blue-500 font-bold px-0.5 rounded-s border-0 cursor-pointer" htmlFor="CalenSelGraf">
                 <Calendar />
             </label>
@@ -54,7 +54,7 @@ export default function CalenGrafica({ setFecha }){
             <button type="button" className="bg-red-600 text-center text-white px-0.5 rounded-e cursor-pointer mr-1" onClick={() => {
                 if(!calenRef?.current?.flatpickr) return;
                 calenRef.current.flatpickr.clear();
-                setFecha([404, 404]);
+                setFecha(0);
             }}>
                 <Trash2 />
             </button>

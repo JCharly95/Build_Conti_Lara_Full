@@ -16,7 +16,7 @@ cm -> mm = cm * 10 */
  * @param {string} uniMedi Nombre de la unidad de medición que uso el sensor
  * @param {number} fechaInicio Cadena de texto con la fecha de inicio proporcionada por el calendario
  * @param {number} fechaFinal Cadena de texto con la fecha final proporcionada por el calendario */
-export default async function crearReportePDF(areaGrafica, datos, nomSensor, uniMedi, fechaInicio, fechaFinal){
+export default async function CrearReportePDF(areaGrafica, datos, nomSensor, uniMedi, fechaInicio, fechaFinal){
 
     // Variables de trabajo: Ancho de pagina en mm. Alto de pagina en mm. Margenes Superior e Inferior en mm. Margenes Izquierdo y Derecho en mm. Longitud maxima (ancho) de una linea o elemento en la pagina. Margenes exteriores de las tablas de datos. Posicionador vertical en el documento. Fecha creacion del reporte.
     let pageWidth = 21.59 * 10, pageHeight = 27.94 * 10, marginTopBot = 2.5 * 10, marginLefRig = 3 * 10, maxLineWidth = pageWidth - marginLefRig * 2, marginTbl = (pageWidth - maxLineWidth) / 2, contPosVerti = marginTopBot, fechaCreaRepor = `${getFecha()} hrs`;
