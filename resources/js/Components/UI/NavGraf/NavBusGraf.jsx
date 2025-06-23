@@ -100,7 +100,7 @@ export default function NavBarGrafica({ infoBus }){
                             <CalenGrafica setFecha={obteFechasSel}/>
                         </section>
                         <section className="block mt-4 lg:inline-block lg:mt-1">
-                            <button type="button" onClick={veriBus} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0">Buscar</button>
+                            <button type="button" onClick={veriBus} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer">Buscar</button>
                         </section>
                         <section className="block mt-4 lg:mb-0 lg:ml-6 lg:inline-block lg:mt-1">
                             <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0">Agregar Sensor</button>

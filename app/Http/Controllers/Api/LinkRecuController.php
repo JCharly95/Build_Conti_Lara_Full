@@ -10,21 +10,27 @@ use App\Http\Controllers\Api\UsuarioController;
 use App\Helpers\GenLinksHelper;
 use App\Mail\RecuperacionEmail;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class LinkRecuController extends Controller
 {
     /** Metodo para obtener todos los enlaces de recuperación guardados
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaEnlacesRecu(){
-        // Obtener todos los enlaces de recuperación en el sistema
-        $enlacesRecu = Link_Recu::all();
-
-        // Regresar un error si no se encontraron enlaces
-        if($enlacesRecu->isEmpty())
-            return response()->json(['msgError' => 'Error: No hay enlaces de recuperación.'], 404);
-
-        // Regresar la lista de sensores encontrados
-        return response()->json(['results' => $enlacesRecu], 200);
+        // Proteger la petición para en caso de fallo, se le notifique al cliente
+        try {
+            // Obtener todos los enlaces de recuperación en el sistema
+            $enlacesRecu = Link_Recu::all();
+            
+            // Regresar un error si no se encontraron enlaces
+            if($enlacesRecu->isEmpty())
+                return response()->json(['msgError' => 'Error: No hay enlaces de recuperación.'], 404);
+    
+            // Regresar la lista de sensores encontrados
+            return response()->json(['results' => $enlacesRecu], 200);
+        } catch(Throwable $exception) {
+            return response()->json(['msgError' => 'Error: No se obtuvieron los enlaces de recuperación. Causa: '.$exception->getMessage()], $exception->getCode());
+        }
     }
 
     /** Metodo para obtener la ruta del sistema en base al enlace enviado en el correo 
@@ -38,17 +44,22 @@ class LinkRecuController extends Controller
 
         // Retornar error si el validador falla
         if($validador->fails())
-            return response()->json(['msgError' => 'Error: Información no encontrada.'], 500);
+            return response()->json(['msgError' => 'Error: El enlace no es valido.'], 500);
 
-        // Buscar la ruta de recuperación en la BD
-        $rutaSis = Link_Recu::where('Link_Correo', '=', $consulta->linkCorreo)->value('Ruta_Sistema');
-
-        // Regresar un error si el no se encontro el usuario
-        if(!$rutaSis)
-            return response()->json(['msgError' => 'Error: Información no encontrada, la solicitud en cuestión no existe o ya fue realizada, favor de generar otra.'], 500);
-
-        // Regresar la información encontrada en la BD
-        return response()->json(['results' => $rutaSis], 200);
+        // Proteger la petición para en caso de fallo, se le notifique al cliente
+        try {
+            // Buscar la ruta de recuperación en la BD
+            $rutaSis = Link_Recu::where('Link_Correo', '=', $consulta->linkCorreo)->value('Ruta_Sistema');
+    
+            // Regresar un error si el no se encontro el usuario
+            if(!$rutaSis)
+                return response()->json(['msgError' => 'Error: El enlace solicitado no existe o ya fue utilizado.'], 404);
+    
+            // Regresar la información encontrada en la BD
+            return response()->json(['results' => $rutaSis], 200);
+        } catch(Throwable $exception) {
+            return response()->json(['msgError' => 'Error: La obtención del enlace no fue realizada. Causa: '.$exception->getMessage()], $exception->getCode());
+        }
     }
 
     /** Metodo para generar el link de recuperación, guardarlo en la BD y enviar el correo de recuperación 
@@ -66,6 +77,7 @@ class LinkRecuController extends Controller
         NOTA: Si en algún punto el proceso se corrompe o hay errores, se regresarán errores como en las demas funciones realizadas */
         
         // Crear un objeto del controlador usuario y usar el metodo de busqueda de usuario recuperacion
+        // NOTA: Revisar este procedimiento, para ver si regresará una respuesta JSON u otro tipo
         $busUsuaRecu = app(UsuarioController::class)->buscarUsuarioRecu($consulta);
         
         // Regresar un error si no se encontro el usuario
@@ -81,32 +93,42 @@ class LinkRecuController extends Controller
 
         // Crear el objeto helper y usar el metodo de generación de links aleatorios
         $linkRecuGen = app(GenLinksHelper::class)->generadorLinks();
-        
-        // Guardar el link aleatorio en la base de datos asi como la ruta del sistema a la que apuntara el enrutamiento dinamico
-        $guardaLink = Link_Recu::create([
-            'Link_Correo' => $linkRecuGen,
-            'Ruta_Sistema' => $consulta->codBus."/".$consulta->nomBus
-        ]);
 
-        // Regresar un error si no se pudo registrar el link de recuperación
-        if(!$guardaLink)
-            return response()->json(['msgError' => 'Error: Proceso de recuperación interrumpido. Favor de intentar nuevamente.'], 500);
+        // Proteger la consulta de la creación del link aleatorio
+        try {
+            // Guardar el link aleatorio en la base de datos asi como la ruta del sistema a la que apuntara el enrutamiento dinamico
+            $guardaLink = Link_Recu::create([
+                'Link_Correo' => $linkRecuGen,
+                'Ruta_Sistema' => $consulta->codBus."/".$consulta->nomBus
+            ]);
+    
+            // Regresar un error si no se pudo registrar el link de recuperación
+            if(!$guardaLink)
+                return response()->json(['msgError' => 'Error: Proceso de recuperación interrumpido. Favor de intentar nuevamente.'], 500);
 
-        // Enviar el correo de recuperación. NOTA: Revisar la estructura del enlace de recuperación al momento de montarlo en el servidor correspondiente
-        $enviarCorreo = Mail::to($consulta->correoBus)->send(new RecuperacionEmail([
-            'nombre' => $consulta->nomBus,
-            'apePat' => $consulta->apePatBus,
-            'apeMat' => $consulta->apeMatBus,
-            'dirEnvio' => $consulta->dirEnvio,
-            'linkRecuCor' => 'http://localhost:8000/api/linkActuContra?linkCorreo='.$linkRecuGen
-        ]));
-        
-        // Revisar que el envio de correo se haya realizado
-        if(is_null($enviarCorreo))
-            return response()->json(['msgError' => 'Error: El correo de recuperación no pudo ser enviado.'], 500);
-        
-        // Regresar la información encontrada en la BD
-        return response()->json(['results' => 'Correo de recuperación enviado. Favor de revisar su correo electronico para continuar con el proceso de renovación.'], 200);
+            // Proteger la consulta del envio del correo
+            try {
+                // Enviar el correo de recuperación. NOTA: Revisar la estructura del enlace de recuperación al momento de montarlo en el servidor correspondiente
+                $enviarCorreo = Mail::to($consulta->correoBus)->send(new RecuperacionEmail([
+                    'nombre' => $consulta->nomBus,
+                    'apePat' => $consulta->apePatBus,
+                    'apeMat' => $consulta->apeMatBus,
+                    'dirEnvio' => $consulta->dirEnvio,
+                    'linkRecuCor' => 'http://localhost:8000/api/linkActuContra?linkCorreo='.$linkRecuGen
+                ]));
+                
+                // Revisar que el envio de correo se haya realizado
+                if(is_null($enviarCorreo))
+                    return response()->json(['msgError' => 'Error: El correo de recuperación no pudo ser enviado.'], 500);
+                
+                // Regresar la información encontrada en la BD
+                return response()->json(['results' => 'Correo de recuperación enviado. Favor de revisar su correo electronico para continuar con el proceso de renovación.'], 200);
+            } catch(Throwable $exception2) {
+                return response()->json(['msgError' => 'Error: El correo de recuperación no fue enviado. Causa: '.$exception2->getMessage()], $exception2->getCode());
+            }
+        } catch(Throwable $exception1) {
+            return response()->json(['msgError' => 'Error: El enlace de recuperación no fue generado. Causa: '.$exception1->getMessage()], $exception1->getCode());
+        }
     }
 
     /** Metodo para borrar el registro de recuperación para evitar un segundo uso 
@@ -120,23 +142,33 @@ class LinkRecuController extends Controller
 
         // Retornar error si el validador falla
         if($validador->fails())
-            return response()->json(['msgError' => 'Error: Información no encontrada.'], 500);
+            return response()->json(['msgError' => 'Error: El enlace solicitado no es valido.'], 500);
 
-        // Obtener el ID del registro a eliminar
-        $idLinkRecu = Link_Recu::where('Link_Correo', '=', $consulta->linkCorreo)->value('ID_Link');
+        // Proteger la consulta para obtener el identificador del enlace
+        try {
+            // Obtener el ID del registro a eliminar
+            $idLinkRecu = Link_Recu::where('Link_Correo', '=', $consulta->linkCorreo)->value('ID_Link');
+    
+            // Regresar un error si el no se encontro el usuario
+            if(!$idLinkRecu)
+                return response()->json(['msgError' => 'Error: El enlace de la recuperación no existe o ya fue eliminado.'], 404);
 
-        // Regresar un error si el no se encontro el usuario
-        if(!$idLinkRecu)
-            return response()->json(['msgError' => 'Error: Información no encontrada, el registro de esta recuperación no existe o ya fue eliminado.'], 404);
-
-        // Borrar el registro de la recuperación
-        $resBorRecu = Link_Recu::delete($idLinkRecu);
-
-        // Regresar un error si el registro no fue eliminado
-        if(!$resBorRecu)
-            return response()->json(['msgError' => 'Error: El registro de recuperación solicitado no pudo ser eliminado.'], 404);
-
-        // Regresar la información encontrada en la BD
-        return response()->json(['results' => 'La recuperación solicitada fue eliminada con exito'], 200);
+            // Proteger la consulta para borrar el enlace de recuperación
+            try {
+                // Borrar el registro de la recuperación
+                $resBorRecu = Link_Recu::delete($idLinkRecu);
+        
+                // Regresar un error si el registro no fue eliminado
+                if(!$resBorRecu)
+                    return response()->json(['msgError' => 'Error: El enlace de la recuperación no pudo ser eliminado.'], 404);
+                
+                // Regresar el mensaje de eliminación exitosa
+                return response()->json(['results' => 'El enlace de la recuperación fue eliminado con exito.'], 200);
+            } catch(Throwable $exception2) {
+                return response()->json(['msgError' => 'Error: El enlace de recuperación no fue eliminado. Causa: '.$exception2->getMessage()], $exception2->getCode());
+            }
+        } catch(Throwable $exception1) {
+            return response()->json(['msgError' => 'Error: El enlace de la recuperación no fue obtenido. Causa: '.$exception1->getMessage()], $exception1->getCode());
+        }
     }
 }

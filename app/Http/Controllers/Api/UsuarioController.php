@@ -8,21 +8,27 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class UsuarioController extends Controller
 {
     /** Metodo para regresar todos los usuarios registrados 
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaUsuarios(){
-        // Obtener todos los usuarios de la BD usando el modelo para buscarlos
-        $usuarios = User::all();
-
-        // Regresar un error si no se encontraron usuarios
-        if($usuarios->isEmpty())
-            return response()->json(['msgError' => 'Error: No hay usuarios registrados.'], 404);
-
-        // Regresar la lista de usuarios encontrados
-        return response()->json(['results' => $usuarios], 200);
+        // Proteger la consulta
+        try {
+            // Obtener todos los usuarios de la BD usando el modelo para buscarlos
+            $usuarios = User::all();
+    
+            // Regresar un error si no se encontraron usuarios
+            if($usuarios->isEmpty())
+                return response()->json(['msgError' => 'Error: No hay usuarios.'], 404);
+            
+            // Regresar la lista de usuarios encontrados
+            return response()->json(['results' => $usuarios], 200);
+        } catch(Throwable $exception) {
+            return response()->json(['msgError' => 'Error: No se encontraron usuarios. Causa: '.$exception->getMessage()], $exception->getCode());
+        }
     }
 
     /** Metodo para autenticar el acceso de los usuarios

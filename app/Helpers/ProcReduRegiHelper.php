@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Illuminate\Http\Request;
 use App\Models\Registro_Sensor;
 use Illuminate\Database\Eloquent\Collection;
+use Throwable;
 
 class ProcReduRegiHelper
 {
@@ -13,7 +14,7 @@ class ProcReduRegiHelper
     /** Función para analizar los datos de la consulta y determinar el proceso de reducción a realizar
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
      * @param int $cantRegis Cantidad de registros obtenida desde la BD para la busqueda de registros
-     * @return array Arreglo de valores resultante (menor al inicial) */
+     * @return array|Throwable Arreglo de valores resultante (menor al inicial) o error de ejecución durante el proceso */
     public function anaReduProc(Request $consulta, int $cantRegis){
         // Crear el arreglo de resultados
         $arrResRedu = [];
@@ -26,26 +27,30 @@ class ProcReduRegiHelper
         
         // Ajustar los valores temporalmente de PHP para evitar el bloqueo de espera en la consulta: limite de memoria, tiempo máximo de ejecución de scripts (en segundos) y tiempo máximo para la obtención de información (en segundos); en este caso la BD. Ambos se establecerán a 7 minutos
         //ini_set('memory_limit', '1024M');
-        ini_set('max_execution_time', 420);
-        ini_set('max_input_time', 420);
+        //ini_set('max_execution_time', 420);
+        //ini_set('max_input_time', 420);
 
-        // Buscar y crear bloques de registros (paginar) el resultado de la consulta (usando chunk) sin guardar en el buffer para evitar el desborde de memoria. Este proceso seria el equivalente a la evaluación por hilos, ya que los bloques seran del tamaño de los hilos (1/4 de la consulta)
-        Registro_Sensor::on('mariadb_unbuffered')->where([
-            ['TIMESTAMP', '>=', ($consulta->fechIni * 1000)],
-            ['TIMESTAMP', '<=', ($consulta->fechFin * 1000)],
-            ['HISTORY_ID', '=', $consulta->senBus]
-        ])->orderBy('TIMESTAMP')
-        ->select(['TIMESTAMP', 'VALUE', 'STATUS_TAG'])
-        ->chunk($cantElemBloq, function (Collection $bloqueHilo) use(&$arrResRedu, $longiMuesRedu){
-            // Reiniciar las claves de cada bloque de datos para evitar el error de elementos asociativos
-            // El error es que la primera iteraccion resulto en: [...] y las posteriores en: {ID: 9, [...]}
-            $bloqueHilo = $bloqueHilo->values();
-            
-            // Llamar al metodo de reducción, transformar la colección de resultados a un arreglo y agregarlo al arreglo de resultados que se regresara al cliente. Se usa array_merge para agregar el resultado obtenido en el final del arreglo de valores ya obtenido
-            $arrResRedu = array_merge($arrResRedu, $this->hiloAnaRedu($bloqueHilo, $longiMuesRedu)->toArray());
-        });
-
-        return $arrResRedu;
+        try {
+            // Buscar y crear bloques de registros (paginar) el resultado de la consulta (usando chunk) sin guardar en el buffer para evitar el desborde de memoria. Este proceso seria el equivalente a la evaluación por hilos, ya que los bloques seran del tamaño de los hilos (1/4 de la consulta)
+            Registro_Sensor::on('mariadb_unbuffered')->where([
+                ['TIMESTAMP', '>=', ($consulta->fechIni * 1000)],
+                ['TIMESTAMP', '<=', ($consulta->fechFin * 1000)],
+                ['HISTORY_ID', '=', $consulta->senBus]
+            ])->orderBy('TIMESTAMP')
+            ->select(['TIMESTAMP', 'VALUE', 'STATUS_TAG'])
+            ->chunk($cantElemBloq, function (Collection $bloqueHilo) use(&$arrResRedu, $longiMuesRedu){
+                // Reiniciar las claves de cada bloque de datos para evitar el error de elementos asociativos
+                // El error es que la primera iteraccion resulto en: [...] y las posteriores en: {ID: 9, [...]}
+                $bloqueHilo = $bloqueHilo->values();
+                
+                // Llamar al metodo de reducción, transformar la colección de resultados a un arreglo y agregarlo al arreglo de resultados que se regresara al cliente. Se usa array_merge para agregar el resultado obtenido en el final del arreglo de valores ya obtenido
+                $arrResRedu = array_merge($arrResRedu, $this->hiloAnaRedu($bloqueHilo, $longiMuesRedu)->toArray());
+            });
+    
+            return $arrResRedu;
+        } catch(Throwable $exception) {
+            return $exception;
+        }
     }
 
     /** Metodo equivalente al proceso de reducción recursiva usando paginación, para reducir la cantidad de registros a mostrar

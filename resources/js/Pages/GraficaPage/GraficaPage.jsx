@@ -26,18 +26,25 @@ export default function GraficaPage(){
             setModalTitu("Cargando");
             setModalConte(<Dialog textMsg="Estamos obteniendo la información y podria tardar unos minutos, favor de permanecer a la espera."/>);
             setModalOpen(true);
-            // Lanzar la consulta para la obtencion de informacion
-            obteRegisGraf(infoBusGraf).then((response) => {
-                // Establecer la información obtenida
-                setDatosGraf(response);
-            }).catch((errObteDatosBD) => {
-                // Cambiar el contenido del modal de carga por modal de error, pero continuar con la visualizacion
+
+            // Lanzar un error en caso de que el usuario seleccione la misma fecha
+            if(infoBusGraf.arrFechas[0] == infoBusGraf.arrFechas[1]){
                 setModalTitu("Error");
-                setModalConte(<Dialog textMsg={errObteDatosBD}/>);
-            }).finally(() => {
-                // Ocultar el modal de carga (o error) si fue el caso
-                setModalOpen(false);
-            });
+                setModalConte(<Dialog textMsg="Error: No puede seleccionar la misma fecha y hora para buscar."/>);
+            } else {
+                // Lanzar la consulta para la obtencion de informacion
+                obteRegisGraf(infoBusGraf).then((response) => {
+                    // Establecer la información obtenida
+                    setDatosGraf(response);
+                }).catch((errObteDatosBD) => {
+                    // Cambiar el contenido del modal de carga por modal de error, pero continuar con la visualizacion
+                    setModalTitu("Error");
+                    setModalConte(<Dialog textMsg={errObteDatosBD}/>);
+                }).finally(() => {
+                    // Ocultar el modal de carga (o error) si fue el caso
+                    setModalOpen(false);
+                });
+            }
         }
     }, [infoBusGraf]);
 
@@ -66,7 +73,7 @@ export async function obteRegisGraf(infoBus){
                 fechIni: infoBus.arrFechas[0],
                 fechFin: infoBus.arrFechas[1]
             },
-            timeout: 0
+            timeout: 420000
         });
         return consulta.data.results;
     } catch (errObteRegSenso) {
