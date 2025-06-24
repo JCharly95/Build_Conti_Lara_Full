@@ -60,7 +60,7 @@ export default function Modal({ titModal, conteModal, isOpen }){
     }
 
     return(
-        <section className="fixed inset-0 bg-gray-600 bg-opacity-70 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <section className="fixed inset-0 bg-gray-600/70 overflow-y-auto h-full w-full flex items-center justify-center z-50">
             <section className="sm:max-w-lg sm:w-full m-3 sm:mx-auto">
                 <section className="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto">
                     <section className="flex justify-between items-center py-2 px-4 border-b-2">

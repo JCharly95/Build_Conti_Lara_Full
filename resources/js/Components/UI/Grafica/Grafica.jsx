@@ -166,44 +166,44 @@ function defOpcsGraf(areaGrafRef, grafDatos, grafEtiq, senDatos, fechas){
                     if(valor === series[seriesIndex][dataPointIndex]){
                         switch(status){
                             case "Activo":
-                                return `<section style="width: 100%;font-weight: 700;">
-                                    <section style="border-width: 1px;border-radius: 0.25rem;--tw-border-opacity: 1;border-color: rgb(156 163 175 / var(--tw-border-opacity));--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity));justify-content: space-between;">
-                                        <section style="--tw-bg-opacity: 1;background-color: rgb(55 65 81 / var(--tw-bg-opacity));border-top-left-radius: 0.375rem;border-top-right-radius: 0.375rem;padding: 0.25rem">
-                                            <span style="--tw-text-opacity: 1;color: rgb(255 255 255 / var(--tw-text-opacity));">${w.config.series[seriesIndex].name}: </span>
+                                return `<section class="w-full font-bold">
+                                    <section class="border rounded border-gray-400 bg-white flex flex-col justify-between">
+                                        <section class="bg-gray-700 rounded-t px-1">
+                                            <span class="text-white">${w.config.series[seriesIndex].name}:</span>
                                         </section>
-                                        <section style="padding: 0.25rem">
+                                        <section class="p-1">
                                             <span>Valor: ${series[seriesIndex][dataPointIndex]}</span>
                                         </section>
-                                        <section style="padding: 0.25rem">
-                                            <span>Estado: </span><span style="--tw-text-opacity: 1;color: rgb(22 163 74 / var(--tw-text-opacity));">Activo</span>
+                                        <section class="p-1">
+                                            <span>Estado: </span><span class="text-green-600">Activo</span>
                                         </section>
                                     </section>
                                 </section>`;
                             case "Inactivo":
-                                return `<section style="width: 100%;font-weight: 700;">
-                                    <section style="border-width: 1px;border-radius: 0.25rem;--tw-border-opacity: 1;border-color: rgb(156 163 175 / var(--tw-border-opacity));--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity));justify-content: space-between;">
-                                        <section style="--tw-bg-opacity: 1;background-color: rgb(55 65 81 / var(--tw-bg-opacity));border-top-left-radius: 0.375rem;border-top-right-radius: 0.375rem;padding: 0.25rem">
-                                            <span style="--tw-text-opacity: 1;color: rgb(255 255 255 / var(--tw-text-opacity));">${w.config.series[seriesIndex].name}: </span>
+                                return `<section class="w-full font-bold">
+                                    <section class="border rounded border-gray-400 bg-white flex flex-col justify-between">
+                                        <section class="bg-gray-700 rounded-t px-1">
+                                            <span class="text-white">${w.config.series[seriesIndex].name}:</span>
                                         </section>
-                                        <section style="padding: 0.25rem">
+                                        <section class="p-1">
                                             <span>Valor: ${series[seriesIndex][dataPointIndex]}</span>
                                         </section>
-                                        <section style="padding: 0.25rem">
-                                            <span>Estado: </span><span style="--tw-text-opacity: 1;color: rgb(220 38 38 / var(--tw-text-opacity));">Inactivo</span>
+                                        <section class="p-1">
+                                            <span>Estado: </span><span class="text-red-600">Inactivo</span>
                                         </section>
                                     </section>
                                 </section>`;
                             default:
-                                return `<section style="width: 100%;font-weight: 700;">
-                                    <section style="border-width: 1px;border-radius: 0.25rem;--tw-border-opacity: 1;border-color: rgb(156 163 175 / var(--tw-border-opacity));--tw-bg-opacity: 1;background-color: rgb(255 255 255 / var(--tw-bg-opacity));justify-content: space-between;">
-                                        <section style="--tw-bg-opacity: 1;background-color: rgb(55 65 81 / var(--tw-bg-opacity));border-top-left-radius: 0.375rem;border-top-right-radius: 0.375rem;padding: 0.25rem">
-                                            <span style="--tw-text-opacity: 1;color: rgb(255 255 255 / var(--tw-text-opacity));">${w.config.series[seriesIndex].name}: </span>
+                                return `<section class="w-full font-bold">
+                                    <section class="border rounded border-gray-400 bg-white flex flex-col justify-between">
+                                        <section class="bg-gray-700 rounded-t px-1">
+                                            <span class="text-white">${w.config.series[seriesIndex].name}:</span>
                                         </section>
-                                        <section style="padding: 0.25rem">
+                                        <section class="p-1">
                                             <span>Valor: ${series[seriesIndex][dataPointIndex]}</span>
                                         </section>
-                                        <section style="padding: 0.25rem">
-                                            <span>Estado: </span><span style="--tw-text-opacity: 1;color: rgb(75 85 99 / var(--tw-text-opacity));">Indefinido</span>
+                                        <section class="p-1">
+                                            <span>Estado: </span><span class="text-gray-600">Indefinido</span>
                                         </section>
                                     </section>
                                 </section>`;

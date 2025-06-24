@@ -120,14 +120,14 @@ class RegistroSensorController extends Controller
             // Proteger la consulta para el regreso de registros en caso de reducción
             try {
                 // Crear el objeto helper y llamar el proceso de reducción de valores y almacenarlo en un arreglo
-                $arrResRedu = app(ProcReduRegiHelper::class)->anaReduProc($consulta, $cantRegis);
+                $resRedu = app(ProcReduRegiHelper::class)->anaReduProc($consulta, $cantRegis);
                 
                 // Si el arreglo de resultados no tiene valores, se regresará un error
-                if (count($arrResRedu) <= 0)
+                if (count($resRedu) <= 0)
                     return response()->json(['msgError' => 'Error: El proceso de reducción tuvo problemas y no pudo generar registros.'], 404);
         
                 // Regresar los registros obtenidos posterior al proceso de reducción
-                return response()->json(['results' => $arrResRedu], 200);
+                return response()->json(['results' => $resRedu], 200);
             } catch(Throwable $exception3) {
                 return response()->json(['msgError' => 'Error: El proceso de reducción tuvo problemas y no generó registros. Causa: '.$exception3->getMessage()], $exception3->getCode());
             }

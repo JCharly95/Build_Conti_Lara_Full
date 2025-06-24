@@ -77,7 +77,7 @@ export default function PagesLayout({ children }){
         const ventaEvents = ['click', 'mousemove', 'mousedown', 'keypress', 'keydown', 'scroll', 'touchstart', 'touchmove'];
 
         // Establecer la sesión por primera vez
-        setTiempoExpira();
+        setTiempoSes();
 
         // Recorrer el arreglo de eventos y asignarle un listener a cada uno; donde la acción será reestablecer la sesión
         ventaEvents.forEach((evento) => (window.addEventListener(evento, setTiempoSes)));

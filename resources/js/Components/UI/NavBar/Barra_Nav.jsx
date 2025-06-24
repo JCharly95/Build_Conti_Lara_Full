@@ -8,7 +8,7 @@ export default function Barra_Navegacion(){
     // Variable de estado para visibilidad de la barra
     const [navBar, setNavBar] = useState(false);
     // Variable con el logo de la barra
-    let logo = <img src="/public/images/Icono_Nombre.png" alt="Imagen Logo" width={225} height={225} className="rounded-md"/>;
+    let logo = <img src="/images/Icono_Nombre.png" alt="Imagen Logo" width={225} height={225} className="rounded-md"/>;
     // Hook de inertia para determinar la pagina activa
     const { url } = usePage();
 
@@ -42,7 +42,7 @@ export default function Barra_Navegacion(){
 
             {/* Estilo de Navegación para Moviles */}
             {/* Mobile Navigation Menu */}
-            <section className={ (navBar) ? "fixed md:hidden left-0 top-0 w-[60%] h-full border-r border-r-gray-900 bg-white ease-in-out duration-500" : "ease-in-out w-[60%] duration-500 fixed top-0 bottom-0 left-[-100%]" }>
+            <section className={ (navBar) ? "fixed md:hidden left-0 top-0 w-[60%] h-full border-r border-r-gray-900 bg-white ease-in-out duration-500" : "ease-in-out w-[60%] duration-500 fixed top-0 bottom-0 -left-full" }>
                 {/* Logo Barra Moviles */}
                 <h1 className="w-full text-xl font-bold text-[#00df9a] my-3 mx-6">
                     { logo }

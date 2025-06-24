@@ -3,8 +3,11 @@ import NavBarGrafica from "../../Components/UI/NavGraf/NavBusGraf";
 import Grafica from "../../Components/UI/Grafica/Grafica";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
+import PagesLayout from "../../Layouts/PagesLayout/PagesLayout";
 
-export default function GraficaPage(){
+/** Funcion para renderizar el componente que contiene la pagina de la grafica
+ * @returns {JSX.Element} Pagina de grafica renderizada */
+function GraficaPage(){
     // Variable de estado para la información de la barra de navegación
     //const [infoBusGraf, setInfoBusGraf] = useState({ sensor: "", fechas: [] });
     const [infoBusGraf, setInfoBusGraf] = useState(null);
@@ -48,19 +51,18 @@ export default function GraficaPage(){
         }
     }, [infoBusGraf]);
 
-    // Función para establecer la información obtenida desde la barra de busqueda
-    /*const infoSelec = (valInfo) => (
-        setInfoBusGraf({ sensor: valInfo.infoSensor, fechas: valInfo.arrFechas })
-    );*/
-
     return(
-        <section className="w-full h-full flex flex-col items-center justify-center bg-slate-400 pt-1">
+        <section className="w-full h-full flex flex-col items-center justify-center bg-slate-400">
             <NavBarGrafica infoBus={setInfoBusGraf} />
             <Grafica infoSenSel={infoBusGraf} datosGrafica={datosGraf} />
             { modalOpen && <Modal isOpen={handleModal} titModal={modalTitu} conteModal={modalConte}/> }
         </section>
     );
 }
+
+// Establecer el layout que contendra a esta pagina
+GraficaPage.layout = (page) => <PagesLayout children={page} />
+export default GraficaPage;
 
 /** Funcion para obtener los registros especificados por el filtrado de sensor y fechas
  * @param {Object} infoBus Objeto con el identificador del sensor y el arreglo con las fechas del rango de busqueda
