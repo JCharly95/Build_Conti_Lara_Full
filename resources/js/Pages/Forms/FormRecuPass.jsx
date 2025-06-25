@@ -49,7 +49,7 @@ export default function FormSoliRecuAcc(){
         setModalOpen(true);
 
         // Redireccionamiento hacia el login despues de 2.5 segundos
-        setTimeout( () => (router.replace({ url: '/' })), 2500);
+        setTimeout( () => ( router.visit('/', { method: 'get', replace: true }) ), 2500);
     }
 
     return(

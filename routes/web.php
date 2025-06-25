@@ -21,7 +21,7 @@ Route::get('/cerSes', function(){
 });
 
 // Ruta para validación y autenticacion del formulario en el login
-Route::post('/valiLog', [UsuarioController::class, "buscarUsuario"]);
+Route::post('/valiLog', [UsuarioController::class, "accesoLogin"]);
 
 // Ruta para mostrar el formulario de renovación de contraseña
 Route::get('/recuAcc', function(){

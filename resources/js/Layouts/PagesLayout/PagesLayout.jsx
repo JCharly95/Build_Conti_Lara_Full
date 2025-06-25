@@ -1,6 +1,7 @@
 import { router } from "@inertiajs/react";
 import React, { useState, useEffect, useRef } from "react";
 import Barra_Navegacion from "../../Components/UI/NavBar/Barra_Nav";
+import Pie_Pagina from "../../Components/UI/Pie/Pie_Gen";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 
@@ -67,7 +68,7 @@ export default function PagesLayout({ children }){
             setModalConte(<Dialog textMsg="El tiempo de su sesión venció, favor de acceder nuevamente." />);
             setModalOpen(true);
             // Redireccionamiento hacia el login despues de 2 segundos
-            setTimeout( () => (router.replace({ url: '/' })), 2000);
+            setTimeout( () => ( router.visit('/', { method: 'get', replace: true }) ), 2000);
         }, 600000);
     };
 
@@ -93,12 +94,13 @@ export default function PagesLayout({ children }){
 
     // Regresar el componente renderizado
     return(
-        <section className="w-full h-full flex flex-col">
+        <section className="w-full h-full flex flex-col font-inter">
             <Barra_Navegacion />
             <main>
                 { children }
             </main>
             { modalOpen && <Modal titModal={modalTitu} conteModal={modalConte} isOpen={handleModal} /> }
+            <Pie_Pagina />
         </section>
     );
 }

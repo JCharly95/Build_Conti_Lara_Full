@@ -1,12 +1,9 @@
-//import React, { useState, useEffect, useRef } from "react";
 import { useState, useEffect, useRef } from "react";
 import { getFecha } from "../../Logic/fecha";
 import useVentaDimen from "../../Hooks/tamVentaHook";
 import ReactApexChart from "react-apexcharts";
 import esp from "apexcharts/dist/locales/es.json";
 import CrearReportePDF from "../../Logic/genReporPDF";
-/*import Modal from "../Modal/Modal";
-import Dialog from "../Modal/Plantillas/Dialog";*/
 
 // infoSenSel: { infoSensor: sensorBusc, arrFechas: arrFechSel }
 export default function Grafica({ infoSenSel, datosGrafica }){
@@ -16,41 +13,29 @@ export default function Grafica({ infoSenSel, datosGrafica }){
     let { dataGraf, labelsGraf } = desgloDatos(datosGrafica);
     // Referencia del area de la grafica
     const areaGrafRef = useRef(null);
-    /* Establecer las opciones de la grafica
-    let opcsGrafi = defOpcsGraf(areaGrafRef, dataGraf, labelsGraf, infoSenSel.infoSensor, infoSenSel.arrFechas);
-    // Establecer los datos de la grafica (series)
-    let seriesGraf = [{
-        name: `Registro ${infoSenSel.infoSensor.split(";")[1]}`,
-        data: dataGraf
-    }];*/
-    // Variable de estado con la configuracion de la grafica
+    // Variable de estado con las opciones de configuración para la grafica
     const [opcsGrafi, setOpcsGrafi] = useState(opcsDefecGraf);
-    // Variable de estado con el arreglo de registros para la grafica
+    // Variable de estado con el arreglo de datos para la grafica
     const [seriesGraf, setSeriesGraf] = useState([]);
-    /* Variables de estado para el modal: titulo, contenido del modal, apertura y cierre 
-    const [modalTitu, setModalTitu] = useState(""),
-    [modalConte, setModalConte] = useState(<></>),
-    [modalOpen, setModalOpen] = useState(false);
     
-    // Mostrar/Ocultar el modal
-    const handleModal = (estado) => ( setModalOpen(estado) );*/
-
     useEffect(() => {
-        if(infoSenSel && datosGrafica){
+        // Mostrar la información en la grafica cuando se tengan datos
+        if(infoSenSel && datosGrafica.length > 0){
             setOpcsGrafi(defOpcsGraf(areaGrafRef, dataGraf, labelsGraf, infoSenSel.infoSensor, infoSenSel.arrFechas));
             setSeriesGraf([{
                 name: `Registro ${infoSenSel.infoSensor.split(";")[1]}`,
                 data: dataGraf
             }]);
+        } else if(infoSenSel && datosGrafica.length <= 0){
+            // No mostrar información en la grafica si no se encontraron registros
+            setSeriesGraf([]);
+            setOpcsGrafi(noDatosGraf);
         }
     }, [infoSenSel, datosGrafica]);
 
     return(
-        <section>
-            <section ref={areaGrafRef} className="md:h-[73dvh] mt-4 z-0">
-                <ReactApexChart type="line" options={opcsGrafi} series={seriesGraf} width={(ventaDimen.width) / 1.5} height={(ventaDimen.height) / 1.5}/>
-            </section>
-            {/* modalOpen && <Modal isOpen={handleModal} titModal={modalTitu} conteModal={modalConte}/> */}
+        <section ref={areaGrafRef} className="md:h-[73dvh] mt-4 z-0">
+            <ReactApexChart type="line" options={opcsGrafi} series={seriesGraf} width={(ventaDimen.width) / 1.5} height={(ventaDimen.height) / 1.5}/>
         </section>
     );
 }
@@ -60,6 +45,7 @@ export default function Grafica({ infoSenSel, datosGrafica }){
 function desgloDatos(arrInfoBD){
     let arrDatos = [], arrLabels = [];
 
+    // Recorrer el arreglo de registros para desglozar la información requerida
     arrInfoBD.forEach((registro) => {
         // Establecer el arreglo "series" que usa la grafica para mostrar los valores, donde cada elemento es un par ordenado de tipo [fecha, valor]
         arrDatos.push([
@@ -92,8 +78,36 @@ function opcsDefecGraf(){
         },
         yaxis: {
             title: {
-                text: "Esperando Seleccion"
+                text: "Esperando Selección"
             }
+        }
+    }
+}
+
+/** Funcion para establecer las opciones de la grafica cuando no se encontró información
+ * @returns Objeto de configuración para renderizar una grafica sin datos */
+function noDatosGraf(){
+    return {
+        chart: {
+            defaultLocale: "es",
+            locales: [esp],
+        },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                datetimeUTC: false,
+            }
+        },
+        yaxis: {
+            title: {
+                text: "Información no encontrada"
+            }
+        },
+        grid: {
+            show: false,
+        },
+        noData: {
+            text: 'El sistema no encontró información relacionada a su consulta'
         }
     }
 }
@@ -156,6 +170,9 @@ function defOpcsGraf(areaGrafRef, grafDatos, grafEtiq, senDatos, fechas){
                 text: `Unidad de Medición: ${nomUniMedi}`
             }
         },
+        grid: {
+            show: true,
+        },
         tooltip: {
             x: {
                 format: "dd-MMM-yyyy; HH:mm:ss"
@@ -214,9 +231,6 @@ function defOpcsGraf(areaGrafRef, grafDatos, grafEtiq, senDatos, fechas){
         },
         stroke: {
             width: 3
-        },
-        noData: {
-            text: 'Preparando información, aguarde por favor...'
         }
     }
 }

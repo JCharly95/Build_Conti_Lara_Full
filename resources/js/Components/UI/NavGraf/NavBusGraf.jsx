@@ -58,7 +58,7 @@ export default function NavBarGrafica({ infoBus }){
             setModalTitu("Error");
             // Caso 2: Establecer si no hubo selección de sensor ni de fechas
             if((sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) && (arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0)){
-                setModalConte(<Dialog textMsg="Favor de seleccionar un rango de fechas para hacer la busqueda."/>);
+                setModalConte(<Dialog textMsg="Favor de seleccionar la información solicitada para hacer la busqueda."/>);
             } else {
                 // Caso 3: Determinar el error de la obtención del sensor
                 if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")){
@@ -83,7 +83,7 @@ export default function NavBarGrafica({ infoBus }){
     return(
         <section className="w-full h-full bg-gray-800">
             <section className="flex items-center justify-between flex-wrap w-full h-full bg-gray-800 px-4 py-1">
-                <section className="flex items-center justify-between shrink-0 text-white mr-2">
+                <section className="flex items-center justify-between shrink-0 text-white mr-2 pb-0.5">
                     <span>Filtro Busqueda:</span>
                 </section>
                 <section className="block lg:hidden">
@@ -103,7 +103,7 @@ export default function NavBarGrafica({ infoBus }){
                             <button type="button" onClick={veriBus} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer">Buscar</button>
                         </section>
                         <section className="block mt-4 lg:mb-0 lg:ml-6 lg:inline-block lg:mt-1">
-                            <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0">Agregar Sensor</button>
+                            <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer">Agregar Sensor</button>
                         </section>
                     </section>
                 </section>

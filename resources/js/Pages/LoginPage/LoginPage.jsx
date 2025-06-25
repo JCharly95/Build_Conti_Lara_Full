@@ -4,6 +4,8 @@ import { Eye, EyeOff } from "react-feather";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 
+/** Funcion para renderizar el componente que contiene la pagina con el formulario de login
+ * @returns {JSX.Element} Pagina de login renderizada */
 export default function LoginPage(){
     /* Variables de trabajo:
     Variable de estado para establecer tipo de campo en la contraseña en el login
@@ -21,11 +23,6 @@ export default function LoginPage(){
         dirCorr: '',
         valPass: ''
     });
-
-    //Useffect para limpiar variables del localstorage que podrian haber quedado en la sesion anterior, si es que hubo
-    useEffect(() => {
-        localStorage.clear();
-    }, []);
 
     // Crear un hook para evitar un retroceso de pagina cuando se encuentre en el login, porque aqui se regresara de la recuperacion y el cierre de sesion
     useEffect(() => {

@@ -1,4 +1,3 @@
-
 /** Funcion para crear el pie del sistema
  * @returns {JSX.Element} El componente que contiene el pie del sistema. */
 export default function Pie_Pagina(){

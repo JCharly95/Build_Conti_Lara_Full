@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import Flatpickr from 'react-flatpickr';
-import 'flatpickr/dist/themes/light.css';
+import 'flatpickr/dist/themes/material_blue.css';
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 import { Calendar, Trash2, HelpCircle } from 'react-feather';
 import Modal from '../Modal/Modal';

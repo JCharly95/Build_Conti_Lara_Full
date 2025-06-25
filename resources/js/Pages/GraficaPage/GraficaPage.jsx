@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import NavBarGrafica from "../../Components/UI/NavGraf/NavBusGraf";
 import Grafica from "../../Components/UI/Grafica/Grafica";
 import Modal from "../../Components/UI/Modal/Modal";
@@ -37,15 +38,22 @@ function GraficaPage(){
             } else {
                 // Lanzar la consulta para la obtencion de informacion
                 obteRegisGraf(infoBusGraf).then((response) => {
-                    // Establecer la información obtenida
-                    setDatosGraf(response);
+                    // Determinar si la respuesta obtenida fue un arreglo
+                    if(Array.isArray(response)){
+                        // Establecer la información obtenida
+                        setDatosGraf(response);
+                        setModalOpen(false);
+                    } else {
+                        // Cambiar el contenido del modal de carga por modal de error
+                        setModalTitu("Error");
+                        setModalConte(<Dialog textMsg={response}/>);
+                        setModalOpen(true);
+                    }
                 }).catch((errObteDatosBD) => {
-                    // Cambiar el contenido del modal de carga por modal de error, pero continuar con la visualizacion
+                    // Cambiar el contenido del modal de carga por modal de error
                     setModalTitu("Error");
                     setModalConte(<Dialog textMsg={errObteDatosBD}/>);
-                }).finally(() => {
-                    // Ocultar el modal de carga (o error) si fue el caso
-                    setModalOpen(false);
+                    setModalOpen(true);
                 });
             }
         }
@@ -60,7 +68,7 @@ function GraficaPage(){
     );
 }
 
-// Establecer el layout que contendra a esta pagina
+// Establecer PagesLayout como el layout que contendrá a esta pagina
 GraficaPage.layout = (page) => <PagesLayout children={page} />
 export default GraficaPage;
 

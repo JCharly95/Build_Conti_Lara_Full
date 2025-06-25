@@ -5,7 +5,7 @@ import Pie_Pagina from "@/Components/UI/Pie/Pie_Gen";
  * @returns {JSX.Element} - Componente JSX con el contenido de la pagina */
 export default function MainLayout({ children }){
     return(
-        <main className="font-sans w-full h-full flex flex-col items-center justify-center">
+        <main className="w-full h-full flex flex-col items-center justify-center font-inter">
             { children }
             <Pie_Pagina />
         </main>

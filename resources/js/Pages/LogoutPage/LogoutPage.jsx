@@ -16,6 +16,6 @@ function LogoutPage(){
     );
 }
 
-// Establecer el layout que contendra a esta pagina
+// Establecer PagesLayout como el layout que contendrá a esta pagina
 LogoutPage.layout = (page) => <PagesLayout children={page} />
 export default LogoutPage;
