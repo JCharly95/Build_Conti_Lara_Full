@@ -36,19 +36,20 @@ class UsuarioController extends Controller
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
      * @return \Illuminate\Http\RedirectResponse Redireccionamiento a la interfaz correspondiente, segun la respuesta obtenida */
     public function accesoLogin(Request $consulta){
-        // Validar los campos del login enviados desde el cliente
+        // Validar los campos del formulario login y deteminar los mensajes de error en caso de que no se cumplan las reglas establecidas
         $validador = Validator::make($consulta->all(), [
             'dirCorr' => 'required|email',
             'valPass' => 'required|regex:/^(?!\s+$)(?=\S{6,20}$)(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*[a-záéíóúüñ])(?=.*\d)(?=.*[^\w\s])[^\s]{6,20}$/u'
+        ], [
+            'dirCorr.required' => 'Error: Se debe ingresar el correo para poder acceder.',
+            'dirCorr.email' => 'Error: El correo no corresponde a una dirección de correo valida.',
+            'valPass.required' => 'Error: Se debe ingresar la contraseña para poder acceder.',
+            'valPass.regex' => 'La contraseña no cumple con los criterios de contraseña establecidos.',
         ]);
 
-        // Regresar a la pantalla anterior agregando los errores de validación, si no se cumplen
-        if($validador->fails()){
-            return back()->withErrors([
-                'dirCorr' => 'El correo no fue ingresado o no corresponde a una dirección de correo valida.',
-                'valPass' => 'La contraseña no fue ingresada o no cumple con los criterios de contraseña establecidos.'
-            ]);
-        }
+        // Regresar a la pantalla anterior agregando los errores de validación generados
+        if($validador->fails())
+            return back()->withErrors($validador);
 
         // Verificar si el usuario existe y autenticar la información ingresada en el formulario
         if(Auth::attempt(['Correo' => $consulta->dirCorr, 'Contra' => $consulta->valPass])){
@@ -56,46 +57,49 @@ class UsuarioController extends Controller
             $fechAcc = app(FechaServerHelper::class)->genFecha();
 
             // Obtener el correo ingresado
-            $correo = $consulta->input('dirCorr');
+            $correo = $consulta->dirCorr;
 
             try {
                 // Actualizar la fecha de acceso en la BD
                 $resActuFech = $this->nueValUltiAcc($correo, $fechAcc);
-    
-                // Regresar un error si la respuesta de la actualización viene vacia
-                if(empty($resActuFech->getContent()))
+
+                // Regresar un error si la respuesta de la actualización no trae información
+                if(!$resActuFech->getContent())
                     return back()->withErrors([
-                        'dirCorr' => 'Error: Actualización de la fecha de acceso erronea.'
+                        'dirCorr' => 'Actualización de la fecha de acceso erronea.',
+                        'valPass' => 'No se pudo actualizar la fecha del ultimo acceso.'
                     ]);
                 
                 // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
-                $resActuFechConve = json_decode($resActuFech, true);
+                $resActuFechConve = $resActuFech->getData(true);
     
                 // Si se obtuvo un error en el proceso se regresará un error de sistema
                 if(array_key_exists('msgError', $resActuFechConve))
-                    return response()->json(['msgError' => $resActuFechConve['msgError']], 404);
+                    return back()->withErrors([
+                        'dirCorr' => $resActuFechConve['msgError']
+                    ]);
+
+                // Establecer la dirección de correo para la sesión
+                $consulta->session()->put('fechUltiAcc', $fechAcc);
     
                 // Si el usuario fue encontrado y autenticado se redirige a la pagina principal, la grafica
                 return redirect()->intended('/grafica');
             } catch(Throwable $exception) {
-
+                return back()->withErrors([
+                    'dirCorr' => 'El usuario no pudo ser autenticado. Causa: '.$exception->getMessage()
+                ]);
             }
-            
         } else {
+            // Regresar al formulario de acceso, modificando el mensaje de error a mostrar
             return back()->withErrors([
-                'dirCorr' => 'No se encontró usuario registrado.'
+                'dirCorr' => 'No se encontró el usuario registrado.'
             ]);
         }
-
-
-        // Establecer la dirección de correo para la sesión
-        $consulta->session()->put('fechUltiAcc', $fechAcc);
-
-        return redirect()->intended('/grafica');
     }
 
     /** Metodo para actualizar la fecha del ultimo acceso 
-     * @param String $valDirCor Cadena de texto con el correo ingresado en el login
+     * @param String $valDirCor Correo ingresado en el login
+     * @param String $fechaAcceso Fecha de acceso obtenida al autenticar
      * @return \Illuminate\Http\JsonResponse Respuesta JSON del resultado para la actualización de la fecha de acceso */
     public function nueValUltiAcc(String $valDirCor, String $fechaAcceso){
         try {
@@ -107,9 +111,8 @@ class UsuarioController extends Controller
                 return response()->json(['msgError' => 'Error: El usuario en cuestión no existe.'], 404);
 
             try {
-                // Establecer el valor del ultimo acceso si se cuentan con los valores requeridos
-                if((strlen($valDirCor) > 0) && (strlen($fechaAcceso) > 0))
-                    $usuario->UltimoAcceso = $fechaAcceso;
+                // Establecer el valor del ultimo acceso
+                $usuario->UltimoAcceso = $fechaAcceso;
 
                 // Actualizar el valor
                 $usuario->save();

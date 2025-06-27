@@ -81,7 +81,7 @@ class LinkRecuController extends Controller
         $busUsuaRecu = app(UsuarioController::class)->buscarUsuarioRecu($consulta);
         
         // Regresar un error si no se encontro el usuario
-        if(empty($busUsuaRecu->getContent()))
+        if(!$busUsuaRecu->getContent())
             return response()->json(['msgError' => 'Error: No hay usuario relacionado con la información ingresada.'], 404);
         
         // Decodificar la respuesta de la busqueda de usuario como arreglo asociativo

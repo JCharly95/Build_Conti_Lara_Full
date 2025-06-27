@@ -47,7 +47,7 @@ export default function LoginPage(){
     useEffect(() => {
         if (errors.dirCorr || errors.valPass) {
             setModalTitu("Error");
-            setModalConte(<Dialog textMsg={`${errors.dirCorr} ${errors.valPass || ""}`}/>);
+            setModalConte(<Dialog textMsg={`${errors.dirCorr || ""}\n${errors.valPass || ""}`}/>);
             setModalOpen(true);
         }
     }, [errors]);
