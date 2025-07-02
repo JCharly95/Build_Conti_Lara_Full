@@ -4,10 +4,24 @@
  * @param {Boolean} props.opcSel - Bandera booleana que contendra la respuesta seleccionada
  * @returns {JSX.Element} El componente que contiene el aviso a mostrar. */
 export default function DialogCancelar({ textMsg, opcSel }){
+    // Preparar un arreglo de strings en caso que el mensaje contenga mas de una oración
+    let arrTexto = [];
+
+    // Determinar si el contenido a mostrar trae saltos de linea
+    if(textMsg.includes("\n") || textMsg.includes("\\n"))
+        arrTexto = (textMsg.includes("\n")) ? textMsg.split("\n") : textMsg.split("\\n");
+
+    // Conservar todos los elementos que no sean "blancos" o compuestos de solo espacios en blanco
+    arrTexto = arrTexto.filter((valor) => (valor !== '' && valor !== ' '));
+
     return(
         <section>
             <section className="flex flex-col items-center text-justify text-black mb-2">
-                <label className="text-base">{ textMsg }</label>
+                {
+                    (arrTexto.length > 0) ? 
+                        arrTexto.map((oracion, idx) => (<span key={idx}>{ oracion }<br /></span>))
+                    : <span>{ textMsg }</span>
+                }
             </section>
             <section className="flex items-center justify-center pt-1">
                 <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3" onClick={() => ( opcSel(true) )}>Cancelar recuperación</button>

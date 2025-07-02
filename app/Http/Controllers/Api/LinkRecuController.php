@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Link_Recu;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Controllers\Api\UsuarioController;
 use App\Helpers\GenLinksHelper;
 use App\Mail\RecuperacionEmail;
 use Illuminate\Support\Facades\Mail;
@@ -34,62 +34,77 @@ class LinkRecuController extends Controller
     }
 
     /** Metodo para obtener la ruta del sistema en base al enlace enviado en el correo 
-     * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
+     * @param String $linkCorreo Link dinamico generado desde el sistema
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
-    public function obteRutaActuSis(Request $consulta){
+    public function obteRutaActuSis(String $linkCorreo){
         // Validar el link enviado en la consulta desde el cliente
-        $validador = Validator::make($consulta->all(), [
-            'linkCorreo' => 'required|regex:/^[a-zA-Z\d-]{1,8}$/'
+        $validador = Validator::make(['linkCorreo' => $linkCorreo], [
+            'linkCorreo' => 'regex:/^[a-zA-Z\d-]{1,8}$/'
+        ], [
+            'linkCorreo.regex' => 'Error: El enlace de recuperación no es valido.'
         ]);
 
-        // Retornar error si el validador falla
+        // Retornar error si el validador de enlaces falla
         if($validador->fails())
-            return response()->json(['msgError' => 'Error: El enlace no es valido.'], 500);
+            return redirect()->route('main')->with('errors', 'Error: El enlace de recuperación no es valido.');
 
         // Proteger la petición para en caso de fallo, se le notifique al cliente
-        try {
+        /*try {
             // Buscar la ruta de recuperación en la BD
-            $rutaSis = Link_Recu::where('Link_Correo', '=', $consulta->linkCorreo)->value('Ruta_Sistema');
+            $rutaSis = Link_Recu::where('Link_Correo', '=', $linkCorreo)->value('Ruta_Sistema');
     
             // Regresar un error si el no se encontro el usuario
             if(!$rutaSis)
+                return redirect()->route('main')->with('errors', 'Error: El enlace solicitado no existe o ya fue utilizado.');
                 return response()->json(['msgError' => 'Error: El enlace solicitado no existe o ya fue utilizado.'], 404);
     
             // Regresar la información encontrada en la BD
             return response()->json(['results' => $rutaSis], 200);
         } catch(Throwable $exception) {
             return response()->json(['msgError' => 'Error: La obtención del enlace no fue realizada. Causa: '.$exception->getMessage()], $exception->getCode());
-        }
+        }*/
     }
 
     /** Metodo para generar el link de recuperación, guardarlo en la BD y enviar el correo de recuperación 
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function crearUsuRecu(Request $consulta){
-        // NOTA Futura: La estructura de la recuperación cambiará ligeramente, puesto que ya no será necesario crear multiples elementos alternando entre back y front (generar el codigo, guardarlo en la bd y enviar el correo) para hacerlo.
-        /* La recuperación cambiará a la siguiente forma: 
-        1.- La funcion recuContra será invocada desde el front y enviará los siguientes elementos: codigo, nombre, apePater, apeMater, correo.
-        2.- Se buscará al usuario en el sistema usando el metodo buscarUsuarioRecu del controlador de usuarios para saber si se procederá con la recuperación.
-        3.- Si se encuentra, se generará el link de recuperación aleatorio en el sistema que se trasladará al back, para ello se usará el helper creado.
-        3.- Una vez generado el link aleatorio, se procedera con el guardado del mismo.
-        4.- Una vez guardado el link en la bd, se procederá con el envio del correo de recuperación al cliente.
-        5.- Al terminar el proceso se le regresará al cliente la respuesta obtenida del envio
-        NOTA: Si en algún punto el proceso se corrompe o hay errores, se regresarán errores como en las demas funciones realizadas */
-        
-        // Crear un objeto del controlador usuario y usar el metodo de busqueda de usuario recuperacion
-        // NOTA: Revisar este procedimiento, para ver si regresará una respuesta JSON u otro tipo
-        $busUsuaRecu = app(UsuarioController::class)->buscarUsuarioRecu($consulta);
-        
-        // Regresar un error si no se encontro el usuario
-        if(!$busUsuaRecu->getContent())
-            return response()->json(['msgError' => 'Error: No hay usuario relacionado con la información ingresada.'], 404);
-        
-        // Decodificar la respuesta de la busqueda de usuario como arreglo asociativo
-        $infoUsuario = json_decode($busUsuaRecu, true);
+        // Validar los campos enviados en el formulario de solicitud
+        $validador = Validator::make($consulta->all(), [
+            'codUser' => 'required|regex:/^(?!.*\s{2,})([A-Z]{3}[-]?[\d]{4})$/',
+            'nomUser' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+(?:\s[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*)$/',
+            'apePatUser' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)$/',
+            'apeMatUser' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)$/',
+            'dirCorUser' => 'required|email'
+        ], [
+            'codUser.required' => 'Error: Se debe ingresar el codigo de usuario para continuar con la solicitud.',
+            'codUser.regex' => 'Error: El codigo ingresado no corresponde a un codigo de usuario valido.',
+            'nomUser.required' => 'Error: Se debe ingresar su(s) nombre(s) para continuar con la solicitud.',
+            'nomUser.regex' => 'Error: La información ingresada en el campo de nombre contiene caracteres no validos.',
+            'apePatUser.required' => 'Error: Se debe ingresar el apellido paterno para continuar con la solicitud.',
+            'apePatUser.regex' => 'Error: El apellido paterno contiene caracteres no validos.',
+            'apeMatUser.required' => 'Error: Se debe ingresar el apellido materno para continuar con la solicitud.',
+            'apeMatUser.regex' => 'Error: El apellido materno contiene caracteres no validos.',
+            'dirCorUser.required' => 'Error: Se debe ingresar el correo para continuar con la solicitud.',
+            'dirCorUser.email' => 'Error: El correo no corresponde a una dirección de correo valida.',
+        ]);
 
-        // Si se obtuvo un error de busqueda se regresará un error de procesamiento del sistema
-        if(array_key_exists('msgError', $infoUsuario))
-            return response()->json(['msgError' => $infoUsuario['msgError']], 404);
+        // Regresar a la pagina anterior con los errores de validación generados
+        if($validador->fails())
+            return back()->withErrors($validador);
+
+        // Buscar y obtener el usuario en la BD
+        $infoUser = User::where([
+            ['Cod_User', '=', $consulta->codUser],
+            ['Nombre', '=', $consulta->nomUser],
+            ['Ape_Pat', '=', $consulta->apePatUser],
+            ['Ape_Mat', '=', $consulta->apeMatUser],
+            ['Correo', '=', $consulta->dirCorUser]
+        ])->select(['Cod_User', 'Correo'])->first();
+
+        // Si no se encontró información del usuario se regresará a la interfaz de recuperación
+        if(!$infoUser)
+            return back()->withErrors(['codUser' => 'Error: El usuario solicitado no existe.']);
 
         // Crear el objeto helper y usar el metodo de generación de links aleatorios
         $linkRecuGen = app(GenLinksHelper::class)->generadorLinks();
@@ -104,30 +119,34 @@ class LinkRecuController extends Controller
     
             // Regresar un error si no se pudo registrar el link de recuperación
             if(!$guardaLink)
-                return response()->json(['msgError' => 'Error: Proceso de recuperación interrumpido. Favor de intentar nuevamente.'], 500);
+                return back()->withErrors(['dirCorUser' => 'Error: Proceso de recuperación interrumpido. Favor de intentar nuevamente.']);
 
             // Proteger la consulta del envio del correo
             try {
-                // Enviar el correo de recuperación. NOTA: Revisar la estructura del enlace de recuperación al momento de montarlo en el servidor correspondiente
+                // Obtener la url de la aplicacion y el puerto de acceso
+                $urlApp = config("app.url");
+                $urlPort = config("app.port");
+
+                // Enviar el correo de recuperación.
                 $enviarCorreo = Mail::to($consulta->correoBus)->send(new RecuperacionEmail([
                     'nombre' => $consulta->nomBus,
                     'apePat' => $consulta->apePatBus,
                     'apeMat' => $consulta->apeMatBus,
                     'dirEnvio' => $consulta->dirEnvio,
-                    'linkRecuCor' => 'http://localhost:8000/api/linkActuContra?linkCorreo='.$linkRecuGen
+                    'linkRecuCor' => $urlApp.':'.$urlPort.'/actuAcc/'.$linkRecuGen
                 ]));
                 
                 // Revisar que el envio de correo se haya realizado
                 if(is_null($enviarCorreo))
-                    return response()->json(['msgError' => 'Error: El correo de recuperación no pudo ser enviado.'], 500);
+                    return back()->withErrors(['dirCorUser' => 'Error: El correo de recuperación no pudo ser enviado.']);
                 
                 // Regresar la información encontrada en la BD
-                return response()->json(['results' => 'Correo de recuperación enviado. Favor de revisar su correo electronico para continuar con el proceso de renovación.'], 200);
+                return back()->with('results', 'Correo de recuperación enviado. Favor de revisar su correo electronico para continuar con la renovación.');
             } catch(Throwable $exception2) {
-                return response()->json(['msgError' => 'Error: El correo de recuperación no fue enviado. Causa: '.$exception2->getMessage()], $exception2->getCode());
+                return back()->withErrors(['dirCorUser' => 'Error: El correo de recuperación no fue enviado. Causa: '.$exception2->getMessage()]);
             }
         } catch(Throwable $exception1) {
-            return response()->json(['msgError' => 'Error: El enlace de recuperación no fue generado. Causa: '.$exception1->getMessage()], $exception1->getCode());
+            return back()->withErrors(['dirCorUser' => 'Error: El enlace de recuperación no fue generado. Causa: '.$exception1->getMessage()]);
         }
     }
 

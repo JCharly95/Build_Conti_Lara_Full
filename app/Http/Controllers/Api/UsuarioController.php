@@ -44,7 +44,7 @@ class UsuarioController extends Controller
             'dirCorr.required' => 'Error: Se debe ingresar el correo para poder acceder.',
             'dirCorr.email' => 'Error: El correo no corresponde a una dirección de correo valida.',
             'valPass.required' => 'Error: Se debe ingresar la contraseña para poder acceder.',
-            'valPass.regex' => 'La contraseña no cumple con los criterios de contraseña establecidos.',
+            'valPass.regex' => 'Error: La contraseña no cumple con los criterios de contraseña establecidos.',
         ]);
 
         // Regresar a la pantalla anterior agregando los errores de validación generados
@@ -66,8 +66,8 @@ class UsuarioController extends Controller
                 // Regresar un error si la respuesta de la actualización no trae información
                 if(!$resActuFech->getContent())
                     return back()->withErrors([
-                        'dirCorr' => 'Actualización de la fecha de acceso erronea.',
-                        'valPass' => 'No se pudo actualizar la fecha del ultimo acceso.'
+                        'dirCorr' => 'Error: Actualización de la fecha de acceso erronea.',
+                        'valPass' => 'Error: No se pudo actualizar la fecha del ultimo acceso.'
                     ]);
                 
                 // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
@@ -83,16 +83,16 @@ class UsuarioController extends Controller
                 $consulta->session()->put('fechUltiAcc', $fechAcc);
     
                 // Si el usuario fue encontrado y autenticado se redirige a la pagina principal, la grafica
-                return redirect()->intended('/grafica');
+                return redirect()->intended('grafica');
             } catch(Throwable $exception) {
                 return back()->withErrors([
-                    'dirCorr' => 'El usuario no pudo ser autenticado. Causa: '.$exception->getMessage()
+                    'dirCorr' => 'Error: El usuario no pudo ser autenticado. Causa: '.$exception->getMessage()
                 ]);
             }
         } else {
             // Regresar al formulario de acceso, modificando el mensaje de error a mostrar
             return back()->withErrors([
-                'dirCorr' => 'No se encontró el usuario registrado.'
+                'dirCorr' => 'Error: No se encontró el usuario registrado.'
             ]);
         }
     }
@@ -125,50 +125,6 @@ class UsuarioController extends Controller
         } catch(Throwable $exception1) {
             return response()->json(['msgError' => 'Error: El usuario no fue encontrado. Causa: '.$exception1->getMessage()], $exception1->getCode());
         }
-    }
-
-    /** Metodo para buscar un usuario para recuperación de acceso 
-     * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
-    public function buscarUsuarioRecu(Request $consulta){
-        // Validar los campos enviados desde el cliente
-        $validador = Validator::make($consulta->all(), [
-            'codUser' => 'required|regex:/^(?!.*\s{2,})([A-Z]{3}[-]?[\d]{4})$/',
-            'nomUser' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+(?:\s[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*)$/',
-            'apePatUser' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)$/',
-            'apeMatUser' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)$/',
-            'dirCorUser' => 'required|email'
-        ]);
-
-        // Retornar error si el validador falla
-        if($validador->fails()){
-            return back()->withErrors([
-                'codUser' => 'El codigo de usuario no es valido.',
-                'nomUser' => 'El nombre o los nombres no son validos, favor de revisar la información.',
-                'apePatUser' => 'El apellido paterno no es valido.',
-                'apeMatUser' => 'El apellido materno no es valido.',
-                'dirCorUser' => 'La dirección de correo no es valida'
-            ]);
-        }
-
-        // Buscar y obtener el usuario en la BD
-        $infoRes = User::where([
-            ['Cod_User', '=', $consulta->codUser],
-            ['Nombre', '=', $consulta->nomUser],
-            ['Ape_Pat', '=', $consulta->apePatUser],
-            ['Ape_Mat', '=', $consulta->apeMatUser],
-            ['Correo', '=', $consulta->dirCorUser]
-        ])->select(['Cod_User', 'Correo'])->first();
-
-        // Si no se encontró información del usuario se regresará a la interfaz de recuperación
-        if(!$infoRes){
-            return back()->withErrors([
-                'codUser' => 'El usuario solicitado no existe.'
-            ]);
-        }
-
-        // Regresar la información encontrada en la BD
-        //return response()->json(['results' => $infoRes], 200);
     }
 
     public function obteUltiAcc(){

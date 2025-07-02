@@ -48,10 +48,10 @@ export default function Barra_Navegacion(){
                 </h1>
 
                 {/* Componentes de navegación para moviles */}
-                <Link href="/grafica" replace className={`block hover:bg-white hover:text-black text-white p-4 text-center rounded-xl m-2 cursor-pointer duration-300 border border-gray-600 ${(url === "/grafica") ? "border-2 border-blue-800 bg-[#044660]" : ""}`}>
+                <Link href="grafica" replace className={`block hover:bg-white hover:text-black text-white p-4 text-center rounded-xl m-2 cursor-pointer duration-300 border border-gray-600 ${(url === "/grafica") ? "border-2 border-blue-800 bg-[#044660]" : ""}`}>
                     Grafica
                 </Link>
-                <Link href="/perfil" replace className={`block hover:bg-white hover:text-black text-white p-4 text-center rounded-xl m-2 cursor-pointer duration-300 border border-gray-600 ${(url == "/perfil") ? "border-2 border-blue-800 bg-[#044660]" : ""}`}>
+                <Link href="perfil" replace className={`block hover:bg-white hover:text-black text-white p-4 text-center rounded-xl m-2 cursor-pointer duration-300 border border-gray-600 ${(url == "/perfil") ? "border-2 border-blue-800 bg-[#044660]" : ""}`}>
                     Perfil
                 </Link>
                 <Link href="/cerSes" replace className="block hover:bg-white hover:text-black text-white p-4 text-center rounded-xl m-2 cursor-pointer duration-300 border border-gray-600">

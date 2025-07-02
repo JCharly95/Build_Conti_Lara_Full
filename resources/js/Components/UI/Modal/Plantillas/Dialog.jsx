@@ -7,8 +7,8 @@ export default function Dialog({ textMsg }){
     let arrTexto = [];
 
     // Determinar si el contenido a mostrar trae saltos de linea
-    if(textMsg.includes("\n"))
-        arrTexto = textMsg.split("\n");
+    if(textMsg.includes("\n") || textMsg.includes("\\n"))
+        arrTexto = (textMsg.includes("\n")) ? textMsg.split("\n") : textMsg.split("\\n");
 
     // Conservar todos los elementos que no sean "blancos" o compuestos de solo espacios en blanco
     arrTexto = arrTexto.filter((valor) => (valor !== '' && valor !== ' '));
