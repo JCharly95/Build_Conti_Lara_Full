@@ -9,7 +9,7 @@ function LogoutPage(){
     // Limpiar la cache local usada para la sesion
     //localStorage.clear();
     // Redireccionamiento hacia el login despues de 2 segundos
-    setTimeout( () => ( router.visit('/', { method: 'get', replace: true }) ), 2000);
+    setTimeout( () => ( router.get('/', {}, { replace: true }) ), 2000);
     
     return(
         <Modal titModal="Cerrar Sesión" conteModal={<Dialog textMsg="Gracias por su visita. Nos vemos después"/>} isOpen={true} />

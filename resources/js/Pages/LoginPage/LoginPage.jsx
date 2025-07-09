@@ -40,14 +40,10 @@ export default function LoginPage({ msgResp, errores }){
     // useEffect para monitorear el resultado obtenido de procesos con resultados satisfactorios y que redirigiran hacia esta pagina, asi como, los errores obtenidos en procesos que tambien redirijan hacia esta pagina 
     useEffect(() => {
         if(msgResp){
-            // Mostrar el modal de aviso satisfactorio para solicitud de recuperación o actualización de contraseña realizada, segun el caso del mensaje de respuesta obtenido
+            // Mostrar el modal de aviso satisfactorio para solicitud de recuperación de contraseña realizada
             if(msgResp.includes("Correo de recuperación enviado")) {
                 setModalTitu("Correo Enviado");
                 setModalConte(<Dialog textMsg={msgResp}/>);
-                setModalOpen(true);
-            } else if(msgResp.includes("La contraseña de")) {
-                setModalTitu("Contraseña Actualizada");
-                setModalConte(<Dialog textMsg={respActuContra}/>);
                 setModalOpen(true);
             }
         }

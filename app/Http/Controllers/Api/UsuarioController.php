@@ -29,7 +29,7 @@ class UsuarioController extends Controller
             // Regresar la lista de usuarios encontrados
             return response()->json(['results' => $usuarios], 200);
         } catch(Throwable $exception) {
-            return response()->json(['msgError' => 'Error: No se encontraron usuarios. Causa: '.$exception->getMessage()], $exception->getCode());
+            return response()->json(['msgError' => 'Error: No se encontraron usuarios. Causa: '.$exception->getMessage()], 500);
         }
     }
 
@@ -121,10 +121,10 @@ class UsuarioController extends Controller
                 // Regresar el mensaje de consulta realizada
                 return response()->json(['results' => 'Fecha de acceso actualizada.'], 200);
             } catch (Throwable $exception2) {
-                return response()->json(['msgError' => 'Error: La fecha de acceso no fue actualizada. Causa: '.$exception2->getMessage()], $exception2->getCode());
+                return response()->json(['msgError' => 'Error: La fecha de acceso no fue actualizada. Causa: '.$exception2->getMessage()], 500);
             }
         } catch(Throwable $exception1) {
-            return response()->json(['msgError' => 'Error: El usuario no fue encontrado. Causa: '.$exception1->getMessage()], $exception1->getCode());
+            return response()->json(['msgError' => 'Error: El usuario no fue encontrado. Causa: '.$exception1->getMessage()], 500);
         }
     }
 
@@ -132,6 +132,9 @@ class UsuarioController extends Controller
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function actuContra(Request $consulta){
+        // Agregar a la session la información de respuesta para el formulario en el front
+        $consulta->session()->put('form', ['linkSoli' => $consulta->linkSis, 'datosUser' => $consulta->codigo.'/'.$consulta->nomPerso]);
+
         // Validar los campos enviados desde el cliente
         $validador = Validator::make($consulta->all(), [
             'nueValContra' => 'required|regex:/^(?!\s+$)(?=\S{6,20}$)(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*[a-záéíóúüñ])(?=.*\d)(?=.*[^\w\s])[^\s]{6,20}$/u',
@@ -143,7 +146,7 @@ class UsuarioController extends Controller
             'confNueValContra.regex' => 'Error: El valor de la confirmación para la contraseña no cumple con los criterios establecidos.',
         ]);
 
-        // Retornar error si el validador falla
+        // Regresar a la pagina anterior (usando redireccion) enviando por sesión los errores y los datos que necesitará el formulario para el envio
         if($validador->fails())
             return back()->withErrors($validador);
         
@@ -190,8 +193,9 @@ class UsuarioController extends Controller
                     if(array_key_exists('msgError', $soliBorLinkConve))
                         return back()->withErrors(['nueValContra' => $soliBorLinkConve['msgError']]);
 
-                    // Para este punto todo salio bien y se regresa el aviso de actualización completada
-                    return back()->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
+                    // Borrar la información sensible de la sesión y redirigir al login con el aviso de proceso concluido en los elementos de sesión
+                    $consulta->session()->forget('form');
+                    return redirect()->route('vistaFormActu')->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
                 } catch(Throwable $exception3) {
                     return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo procesar el enlace de recuperación apropiadamente. Causa: '.$exception3->getMessage()]);
                 }

@@ -68,7 +68,7 @@ export default function PagesLayout({ children }){
             setModalConte(<Dialog textMsg="El tiempo de su sesión venció, favor de acceder nuevamente." />);
             setModalOpen(true);
             // Redireccionamiento hacia el login despues de 2 segundos
-            setTimeout( () => ( router.visit('/', { method: 'get', replace: true }) ), 2000);
+            setTimeout( () => ( router.get('/', {}, { replace: true }) ), 2000);
         }, 600000);
     };
 

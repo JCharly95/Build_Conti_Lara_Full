@@ -30,7 +30,7 @@ class LinkRecuController extends Controller
             // Regresar la lista de sensores encontrados
             return response()->json(['results' => $enlacesRecu], 200);
         } catch(Throwable $exception) {
-            return response()->json(['msgError' => 'Error: No se obtuvieron los enlaces de recuperación. Causa: '.$exception->getMessage()], $exception->getCode());
+            return response()->json(['msgError' => 'Error: No se obtuvieron los enlaces de recuperación. Causa: '.$exception->getMessage()], 500);
         }
     }
 
@@ -57,7 +57,7 @@ class LinkRecuController extends Controller
                 return redirect()->route('main')->with('msgError', 'Error: El enlace solicitado no existe o ya fue utilizado.');
     
             // Regresar a la pagina anterior enviando por sesión la información sobre el formulario a mostrar y el enlace utilizado en la petición
-            return redirect()->route('vistaFormActu')->with('form', ['linkSis' => $linkCorreo, 'datosUser' => $rutaSis]);
+            return redirect()->route('vistaFormActu')->with('form', ['linkSoli' => $linkCorreo, 'datosUser' => $rutaSis]);
         } catch(Throwable $exception) {
             return redirect()->route('main')->with('msgError', 'Error: La obtención del enlace no fue realizada. Causa: '.$exception->getMessage());
         }
@@ -175,8 +175,8 @@ class LinkRecuController extends Controller
 
             // Proteger la consulta para borrar el enlace de recuperación
             try {
-                // Borrar el registro de la recuperación
-                $resBorRecu = Link_Recu::delete($idLinkRecu);
+                // Borrar el registro de la recuperación (en este caso se usa destroy, porque previamente se obtuvo el id del registro)
+                $resBorRecu = Link_Recu::destroy($idLinkRecu);
         
                 // Regresar un error si el registro no fue eliminado
                 if(!$resBorRecu)
@@ -188,11 +188,11 @@ class LinkRecuController extends Controller
                 : response()->json(['results' => 'El enlace de esta solicitud fue eliminado con exito.'], 200);
             } catch(Throwable $exception2) {
                 return ($origenPeti === 0) ? back()->withErrors(['linkSis' => 'Error: El enlace de recuperación no fue eliminado. Causa: '.$exception2->getMessage()])
-                : response()->json(['msgError' => 'Error: No se obtuvieron los enlaces de recuperación. Causa: '.$exception2->getMessage()], $exception2->getCode());
+                : response()->json(['msgError' => 'Error: El enlace de recuperación no fue eliminado. Causa: '.$exception2->getMessage()], 500);
             }
         } catch(Throwable $exception1) {
             return ($origenPeti === 0) ? back()->withErrors(['linkSis' => 'Error: El enlace de la recuperación no fue encontrado. Causa: '.$exception1->getMessage()])
-            : response()->json(['msgError' => 'Error: El enlace de la recuperación no fue encontrado. Causa: '.$exception1->getMessage()], $exception1->getCode());
+            : response()->json(['msgError' => 'Error: El enlace de la recuperación no fue encontrado. Causa: '.$exception1->getMessage()], 500);
         }
     }
 }

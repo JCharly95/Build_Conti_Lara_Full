@@ -56,11 +56,17 @@ Route::post('/valiSoliRecu', [LinkRecuController::class, "crearUsuRecu"])->name(
 Route::get('/actuAcc/{linkCorreo}', [LinkRecuController::class, "obteRutaActuSis"])->name("actuAcceso");
 
 // Ruta para renderizar el formulario de actualización de contraseña
-Route::get('/formActuContra', function(Request $consulta) {
+Route::get('/actualizarAcceso', function(Request $consulta) {
+    // Obtener la información de respuesta satifactoria desde la consulta
+    $msgRespData = $consulta->session()->get('results');
     // Obtener la información de sesión enviada desde el controlador
     $sesDatos = $consulta->session()->get('form');
 
-    return Inertia::render('ActuPassPage/FormActuPass', ['infoSes' => $sesDatos]);
+    // Agregando partial reload (inertia) en caso de que el usuario refresque la pagina, para que no se pierda la información de sesión en el componente
+    if($msgRespData)
+        return Inertia::render('ActuPassPage/FormActuPass', ['infoSes' => Inertia::always($sesDatos), 'procResp' =>  Inertia::always($msgRespData)]);
+
+    return Inertia::render('ActuPassPage/FormActuPass', ['infoSes' => Inertia::always($sesDatos)]);
 })->name("vistaFormActu");
 
 // Ruta para validación y actualización de la contraseña para el acceso al sistema

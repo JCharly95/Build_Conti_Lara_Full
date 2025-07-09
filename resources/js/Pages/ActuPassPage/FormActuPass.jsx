@@ -1,6 +1,5 @@
-import axios from "axios";
-import { useState, useEffect } from "react";
-import { useForm, usePage } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import { useForm, router, useRemember } from "@inertiajs/react";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import DialogCancelar from "../../Components/UI/Modal/Plantillas/DialogCancel";
@@ -8,14 +7,11 @@ import { Upload, Key, Eye, EyeOff } from "react-feather";
 
 /** Función para renderizar el formulario para la solicitud de recuperación de acceso
  * @param {object} props - Objeto con las propiedades ingresadas para la visualización del formulario
- * @param {string} props.linkSoli - Enlace de recuperación generado por el sistema para la transacción de recuperación
- * @param {string} props.infoUser - Codigo y nombre del usuario que solicitó la recuperación
+ * @param {object} props.infoSes - Arreglo de datos con la información de la sesión
+ * @param {string} props.procResp - Cadena de texto con la respuesta satisfactoria del proceso concluido
  * @returns {JSX.Element} Componente del formulario de solicitud para recuperación de acceso */
-export default function FormActuContra({ infoSes }){
-    let pageProps = usePage().props;
-    console.log(infoSes);
-
-     /* Variables de trabajo:
+export default function FormActuContra({ infoSes, procResp }){
+    /* Variables de trabajo:
     Variable de estado para establecer tipo de campo en de la nueva contraseña
     Variable de estado para establecer tipo de campo en de la confirmación de la nueva contraseña
     Variable de estado para establecer el titulo a mostrar del boton nueva contraseña cuando se tenga el puntero encima de este
@@ -35,21 +31,30 @@ export default function FormActuContra({ infoSes }){
     [modalOpen, setModalOpen] = useState(false),
     { data, setData, post, delete: destroy, processing, errors, reset } = useForm({
         nueValContra: '',
-        confNueValContra: ''
+        confNueValContra: '',
+        codigo: (infoSes) ? infoSes.datosUser.split("/")[0] : "codigo_Generico",
+        nomPerso: (infoSes) ? infoSes.datosUser.split("/")[1] : "info_Generica",
+        linkSis: (infoSes) ? infoSes.linkSoli : "enlace_Generico"
     });
 
+    // useEffect para monitorear los errores obtenidos en la validación, asi como, el resultado satisfactorio
     useEffect(() => {
-        console.log(pageProps);
-    },[pageProps]);
+        if(procResp){
+            // Mostrar el modal de aviso satisfactorio para solicitud de actualización de contraseña realizada y redirigir al login pasados 2.5 segundos
+            if(procResp.includes("La contraseña de")) {
+                setModalTitu("Contraseña Actualizada");
+                setModalConte(<Dialog textMsg={respActuContra}/>);
+                setModalOpen(true);
+                setTimeout(() => ( router.get('/', {}, { replace: true }) ), 2500);
+            }
+        }
 
-    // useEffect para monitorear los errores obtenidos en la validacion
-    useEffect(() => {
         if (errors.nueValContra || errors.confNueValContra) {
             setModalTitu("Error");
             setModalConte(<Dialog textMsg={`${errors.nueValContra || ""}\n${errors.confNueValContra || ""}`}/>);
             setModalOpen(true);
         }
-    }, [errors]);
+    }, [errors, procResp]);
 
     // Mostrar/Ocultar contraseña; campo nueva contraseña
     const verNuePass = () => {
@@ -88,18 +93,15 @@ export default function FormActuContra({ infoSes }){
             reset();
 
             // Se canceló la recuperacion; se deberá eliminar el enlace utilizado para la petición
-            destroy(`/borLinkActuPas/${linkSoli}/0`, {
+            destroy(`/borLinkActuPas/${(infoSes) ? infoSes.linkSoli : "enlace_Generico"}/0`, {
                 onSuccess: (page) => {
                     // Abrir el modal de aviso para la confirmación de cancelación
                     setModalTitu("Aviso de Cancelación");
                     setModalConte(<Dialog textMsg={page.props?.results || "Tu solicitud fue cancelada exitosamente."}/>);
                     setModalOpen(true);
 
-                    // Cerrar el modal de aviso y cambiar por el formulario de acceso
-                    setTimeout(() => {
-                        setModalOpen(false);
-                        chgForm('FormLogin');
-                    }, 2500);
+                    // Redirigir a la ventana de login después de 2.5 segundos
+                    setTimeout(() => ( router.get('/', {}, { replace: true }) ), 2500);
                 },
                 onError: (errors) => {
                     setModalTitu("Error");
@@ -113,15 +115,14 @@ export default function FormActuContra({ infoSes }){
         }
     }
 
-    // Funcion para validación y envio del formulario
+    /** Funcion para validación y envio del formulario de actualización de contraseña
+     * @param {React.FormEventHandler<HTMLFormElement>} event - Evento de escucha para el envio del formulario */
     function submitActuContra(event){
         event.preventDefault();
-        
-        // Enviar el formulario a la ruta de procesamiento en el back junto con información no editable requerida en el proceso
         post('/valiActuContra', {
-            codigo: infoUser.split("/")[0],
-            nomPerso: infoUser.split("/")[1],
-            linkSis: linkSoli
+            onError: () => {
+                reset('nueValContra', 'confNueValContra');
+            }
         });
     }
 
@@ -139,7 +140,7 @@ export default function FormActuContra({ infoSes }){
                 <section className="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto">
                     <section className="flex justify-between items-center py-2 px-4 border-b-2">
                         <h3 className="font-bold text-gray-800 inline-flex items-center">
-                            <Upload color="black" size={25} className="mr-2"/> <Key color="black" size={25} className="mr-2"/> Actualización de Contraseña para {/* infoUser.split("/")[1] */}
+                            <Upload color="black" size={25} className="mr-2"/> <Key color="black" size={25} className="mr-2"/> Actualización de Contraseña para { (infoSes) ? infoSes.datosUser.split("/")[1] : "Usuario" }
                         </h3>
                     </section>
                     <section className="lg:p-4 p-2 overflow-y-auto inline-flex">
