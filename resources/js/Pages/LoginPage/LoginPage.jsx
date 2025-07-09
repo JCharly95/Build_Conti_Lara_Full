@@ -1,35 +1,22 @@
 import { useState, useEffect } from "react";
-import { useForm } from "@inertiajs/react";
-import { Eye, EyeOff } from "react-feather";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
-import FormAcc from "../Forms/FormLogin";
-import FormSoliRecuAcc from "../Forms/FormRecuPass";
+import FormAcceso from "../Forms/FormLogin";
+import FormSoliRecuAcc from "../Forms/FormSoliRecuPass";
 
-/** Funcion para renderizar el componente que contiene la pagina con el formulario de login
- * @returns {JSX.Element} Pagina de login renderizada */
+/** Funcion para renderizar el componente que contiene los formularios fuera de la sesión del sistema
+ * @param {object} props - Objeto con las propiedades ingresadas para la visualización de la pagina
+ * @param {string} props.msgResp - Mensaje con el resultado obtenido de un proceso satisfactorio cuando este redireccione hacia el login
+ * @param {string} props.errores - Mensaje con los errores obtenidos durante un proceso y este redireccione hacia el login
+ * @returns {JSX.Element} Componente de la pagina de login o formularios exteriores a la sesión del sistema. */
 export default function LoginPage({ msgResp, errores }){
+    /* Variables de trabajo:
+    Variable de estado para determinar el formulario a mostrar
+    Variables de estado para el modal: titulo, contenido del modal y visibilidad del mismo */
     const [formActivo, setFormActivo] = useState('FormLogin'),
     [modalTitu, setModalTitu] = useState(""),
     [modalConte, setModalConte] = useState(<></>),
     [modalOpen, setModalOpen] = useState(false);
-
-    /* Variables de trabajo:
-    Variable de estado para establecer tipo de campo en la contraseña en el login
-    Variable de estado para establecer el icono a mostrar en el boton de mostrar contraseña
-    Variable de estado para establecer el titulo a mostrar del boton cuando se tenga el puntero encima de este
-    Variables de estado para el modal: titulo, contenido del modal y visibilidad del mismo
-    Hook para el formulario cortesia de inertia para poder controlar el estado de los campos del formulario
-    const [tipInputPas, setTipInputPas] = useState("password"),
-    [iconBtnPas, setIconBtnPas] = useState(<Eye id="ojo_abierto" color="black" size={30}/>),
-    [btnTitulo, setBtnTitulo] = useState("Mostrar Contraseña"),
-    [modalTitu, setModalTitu] = useState(""),
-    [modalConte, setModalConte] = useState(""),
-    [modalOpen, setModalOpen] = useState(false),
-    { data, setData, post, processing, errors } = useForm({
-        dirCorr: '',
-        valPass: ''
-    }); */
 
     // Crear un hook para evitar un retroceso de pagina cuando se encuentre en el login, porque aqui se regresara de la recuperacion y el cierre de sesion
     useEffect(() => {
@@ -50,41 +37,28 @@ export default function LoginPage({ msgResp, errores }){
         };
     },[]);
 
-    // useEffect para monitorear los errores obtenidos en la validacion
+    // useEffect para monitorear el resultado obtenido de procesos con resultados satisfactorios y que redirigiran hacia esta pagina, asi como, los errores obtenidos en procesos que tambien redirijan hacia esta pagina 
     useEffect(() => {
         if(msgResp){
-            console.log(msgResp);
-            setModalTitu("Correo Enviado");
-            setModalConte(<Dialog textMsg={msgResp}/>);
-            setModalOpen(true);
+            // Mostrar el modal de aviso satisfactorio para solicitud de recuperación o actualización de contraseña realizada, segun el caso del mensaje de respuesta obtenido
+            if(msgResp.includes("Correo de recuperación enviado")) {
+                setModalTitu("Correo Enviado");
+                setModalConte(<Dialog textMsg={msgResp}/>);
+                setModalOpen(true);
+            } else if(msgResp.includes("La contraseña de")) {
+                setModalTitu("Contraseña Actualizada");
+                setModalConte(<Dialog textMsg={respActuContra}/>);
+                setModalOpen(true);
+            }
         }
 
-        if(errores){
-            console.log(errores);
+        // Mostrar el modal de errores con los errores generados durante los procesos correspondientes
+        if(errores) {
             setModalTitu("Error");
             setModalConte(<Dialog textMsg={`${errores}`}/>);
             setModalOpen(true);
         }
     }, [msgResp, errores]);
-
-    /* Mostrar/Ocultar contraseña
-    const verPass = () => {
-        if(tipInputPas == "password") {
-            setTipInputPas("text");
-            setBtnTitulo("Ocultar Contraseña");
-            setIconBtnPas(<EyeOff id="ojo_cerrado" color="black" size={30}/>);
-        } else {
-            setTipInputPas("password");
-            setBtnTitulo("Mostrar Contraseña");
-            setIconBtnPas(<Eye id="ojo_abierto" color="black" size={30}/>);
-        }
-    };
-    
-    // Funcion de envio para validacion y envio del formulario (refabricada para la incorporación del hook)
-    function submitLogForm(event){
-        event.preventDefault();
-        post('/valiLog');
-    }*/
     
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
@@ -92,12 +66,12 @@ export default function LoginPage({ msgResp, errores }){
     // Ver el formulario de login
     const verFormLogin = (valorSelec) => ( setFormActivo(valorSelec) );
 
-    // Ver el formulario para la solicitud de la recuperación de la información
+    // Ver el formulario para la solicitud de la recuperación de acceso
     const verFormSoliRecu = (valorSelec) => ( setFormActivo(valorSelec) );
     
     return(
         <section>
-            {formActivo === 'FormLogin' && <FormAcc chgForm={verFormLogin}/>}
+            {formActivo === 'FormLogin' && <FormAcceso chgForm={verFormLogin}/>}
             {formActivo === 'FormSoliRecuAcc' && <FormSoliRecuAcc chgForm={verFormSoliRecu} />}
             {modalOpen && <Modal isOpen={handleModal} titModal={modalTitu} conteModal={modalConte}/>}
         </section>

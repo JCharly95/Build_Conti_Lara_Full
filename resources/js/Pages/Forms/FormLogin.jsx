@@ -4,7 +4,11 @@ import { Eye, EyeOff } from "react-feather";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 
-export default function FormAcc({ chgForm }){
+/** Función para renderizar el formulario de acceso
+ * @param {object} props - Objeto con las propiedades ingresadas para la visualización del formulario
+ * @param {React.SetStateAction<string>} props.chgForm - Función para establecer el nombre del formulario a cambiar, mostrar o regresar
+ * @returns {JSX.Element} Componente del formulario de acceso */
+export default function FormAcceso({ chgForm }){
     /* Variables de trabajo:
     Variable de estado para establecer tipo de campo en la contraseña en el login
     Variable de estado para establecer el icono a mostrar en el boton de mostrar contraseña

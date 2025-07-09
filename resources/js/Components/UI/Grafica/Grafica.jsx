@@ -20,13 +20,13 @@ export default function Grafica({ infoSenSel, datosGrafica }){
     
     useEffect(() => {
         // Mostrar la información en la grafica cuando se tengan datos
-        if(infoSenSel && datosGrafica.length > 0){
+        if(infoSenSel && datosGrafica.length > 0) {
             setOpcsGrafi(defOpcsGraf(areaGrafRef, dataGraf, labelsGraf, infoSenSel.infoSensor, infoSenSel.arrFechas));
             setSeriesGraf([{
                 name: `Registro ${infoSenSel.infoSensor.split(";")[1]}`,
                 data: dataGraf
             }]);
-        } else if(infoSenSel && datosGrafica.length <= 0){
+        } else if(infoSenSel && datosGrafica.length <= 0) {
             // No mostrar información en la grafica si no se encontraron registros
             setSeriesGraf([]);
             setOpcsGrafi(noDatosGraf);
@@ -178,10 +178,10 @@ function defOpcsGraf(areaGrafRef, grafDatos, grafEtiq, senDatos, fechas){
                 format: "dd-MMM-yyyy; HH:mm:ss"
             },
             custom: function({series, seriesIndex, dataPointIndex, w}){
-                for(let cont = 0; cont < grafEtiq.length; cont++){
+                for(let cont = 0; cont < grafEtiq.length; cont++) {
                     let valor = grafEtiq[cont].valor, status = grafEtiq[cont].estatus;
-                    if(valor === series[seriesIndex][dataPointIndex]){
-                        switch(status){
+                    if(valor === series[seriesIndex][dataPointIndex]) {
+                        switch(status) {
                             case "Activo":
                                 return `<section class="w-full font-bold">
                                     <section class="border rounded border-gray-400 bg-white flex flex-col justify-between">

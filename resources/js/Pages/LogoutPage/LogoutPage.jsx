@@ -7,7 +7,7 @@ import PagesLayout from "../../Layouts/PagesLayout/PagesLayout";
  * @returns {JSX.Element} Pagina cierre de sesión renderizada */
 function LogoutPage(){
     // Limpiar la cache local usada para la sesion
-    localStorage.clear();
+    //localStorage.clear();
     // Redireccionamiento hacia el login despues de 2 segundos
     setTimeout( () => ( router.visit('/', { method: 'get', replace: true }) ), 2000);
     

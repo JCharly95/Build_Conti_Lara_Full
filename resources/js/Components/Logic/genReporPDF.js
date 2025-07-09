@@ -160,7 +160,7 @@ function calcuDatosEspeci(arrInfo, objDoc, iniVerti, ancho, margen){
     let posArrFech = 0, contPosVerti = iniVerti;
     
     // Crear un ciclo para obtener la informacion de cada tabla y pintarla en el documento. OJO: Este ciclo funciona en cuestion al posicionador que se usara para recorrer el arreglo de las fechas filtradas y este continuará hasta que se hayan recorrido todos los valores del arreglo de fechas
-    while(posArrFech < arrFechasNoRep.length){
+    while(posArrFech < arrFechasNoRep.length) {
         // Obtener la fecha a comparar en la iteracion
         let fechaCmp = arrFechasNoRep[posArrFech];
         // Crear un arreglo solo con los registros que contengan la fecha a comparar

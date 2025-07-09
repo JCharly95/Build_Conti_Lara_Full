@@ -29,7 +29,7 @@ export default function NavBarGrafica({ infoBus }){
     /** Funcion para obtener la información del sensor seleccionado o el error en la consulta
      * @param {String} infoSenSel Cadena de texto con la información del sensor concatenada o el error obtenido */
     const obteSensoSel = (infoSenSel) => {
-        if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error") || !infoSenSel.includes(";")){
+        if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error") || !infoSenSel.includes(";")) {
             setModalTitu("Error");
             setModalConte(<Dialog textMsg={infoSenSel}/>);
             setModalOpen(true);
@@ -41,7 +41,7 @@ export default function NavBarGrafica({ infoBus }){
      * @param {Array} valFechSel Arreglo con las fechas seleccionadas para la busqueda */
     const obteFechasSel = (valFechSel) => {
         // Solo al seleccionar fechas con flatpickr (en este caso, por la selección rango) se regresa un arreglo
-        if(!Array.isArray(valFechSel)){
+        if(!Array.isArray(valFechSel)) {
             setModalTitu("Error");
             setModalConte(<Dialog textMsg="Favor de seleccionar un rango de fechas para hacer la busqueda."/>);
             setModalOpen(true);
@@ -53,22 +53,22 @@ export default function NavBarGrafica({ infoBus }){
     const veriBus = () => {
         // Previo a hacer la busqueda de valores, se deberá corroborar que se hayan seleccionado valores en los campos del formulario (sensor y calendarios). En caso que no, desplegar el mensaje de error correspondiente al campo faltante
         // Caso 1: Se busca valor por defecto en todos los campos y en cualquier coincidencia evaluar cual es el campo faltante
-        if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";") || arrFechSel.length == 0 || !Array.isArray(arrFechSel)){
+        if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";") || arrFechSel.length == 0 || !Array.isArray(arrFechSel)) {
             // Preparar el encabezado para el modal de error
             setModalTitu("Error");
             // Caso 2: Establecer si no hubo selección de sensor ni de fechas
-            if((sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) && (arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0)){
+            if((sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) && (arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0)) {
                 setModalConte(<Dialog textMsg="Favor de seleccionar la información solicitada para hacer la busqueda."/>);
             } else {
                 // Caso 3: Determinar el error de la obtención del sensor
-                if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")){
+                if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) {
                     if(sensorBusc.includes("Error"))
                         setModalConte(<Dialog textMsg={`${sensorBusc}`}/>);
                     else
                         setModalConte(<Dialog textMsg="Favor de seleccionar un sensor de la lista para hacer la busqueda."/>);
                 }
                 // Caso 4: Determinar el error de la obtención del rango de fechas
-                if(arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0){
+                if(arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0) {
                     setModalConte(<Dialog textMsg="Favor de seleccionar un rango de fechas para hacer la busqueda."/>);
                 }
             }

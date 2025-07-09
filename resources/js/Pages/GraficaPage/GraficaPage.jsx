@@ -25,21 +25,22 @@ function GraficaPage(){
     // useEffect para monitorear el cambio de datos en la seleccion
     useEffect(() => {
         // En lugar de utilizar una funcion receptora, el useEffect estará monitoreando el cambio de valores desde la barra
-        if(infoBusGraf){
+        if(infoBusGraf) {
             // Lanzar el modal de carga para la obtención de valores
             setModalTitu("Cargando");
             setModalConte(<Dialog textMsg="Estamos obteniendo la información y podria tardar unos minutos, favor de permanecer a la espera."/>);
             setModalOpen(true);
 
             // Lanzar un error en caso de que el usuario seleccione la misma fecha
-            if(infoBusGraf.arrFechas[0] == infoBusGraf.arrFechas[1]){
+            if(infoBusGraf.arrFechas[0] == infoBusGraf.arrFechas[1]) {
                 setModalTitu("Error");
                 setModalConte(<Dialog textMsg="Error: No puede seleccionar la misma fecha y hora para buscar."/>);
+                setModalOpen(true);
             } else {
                 // Lanzar la consulta para la obtencion de informacion
                 obteRegisGraf(infoBusGraf).then((response) => {
                     // Determinar si la respuesta obtenida fue un arreglo
-                    if(Array.isArray(response)){
+                    if(Array.isArray(response)) {
                         // Establecer la información obtenida
                         setDatosGraf(response);
                         setModalOpen(false);

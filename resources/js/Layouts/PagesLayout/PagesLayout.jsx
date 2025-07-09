@@ -23,7 +23,7 @@ export default function PagesLayout({ children }){
     // UseEffect para monitorear el uso de teclas F12 para consola y menu contextual, asi como el clic derecho, tambien menu contextual
     /*useEffect(() => {
         const funEscuTecla = (evento) => {
-            if(evento.key == "F12"){
+            if(evento.key == "F12") {
                 evento.preventDefault();
                 // Establecer el titulo del modal, el contenido del mismo y la apertura de este
                 setModalTitu("Error");

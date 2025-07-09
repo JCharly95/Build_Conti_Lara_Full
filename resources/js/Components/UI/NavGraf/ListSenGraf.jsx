@@ -71,7 +71,7 @@ function ordeDatos(arrInfo){
         objRegi = { id: sensor.ID_Sensor, nombre: `${sensor.Nombre}`, valor: `${sensor.ID_}`, unidad: "" };
 
         // Determinar la unidad del registro
-        switch(uniRegi){
+        switch(uniRegi) {
             case 'V':
             case 'v':
                 objRegi.unidad = 'Volts';

@@ -4,6 +4,10 @@ import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import { FileText } from "react-feather";
 
+/** Función para renderizar el formulario para la solicitud de recuperación de acceso
+ * @param {object} props - Objeto con las propiedades ingresadas para la visualización del formulario
+ * @param {React.SetStateAction<string>} props.chgForm - Función para establecer el nombre del formulario a cambiar, mostrar o regresar
+ * @returns {JSX.Element} Componente del formulario de solicitud para recuperación de acceso */
 export default function FormSoliRecuAcc({ chgForm }){
      /* Variables de trabajo:
     Variables de estado para el modal: apertura y cierre, titulo, contenido del modal
@@ -38,8 +42,8 @@ export default function FormSoliRecuAcc({ chgForm }){
         post('/valiSoliRecu');
     }
 
-    /** Función para enviar interrumpir el proceso de recuperación antes de generar el link de acceso y redireccionamiento al login */
-    function cancelRecu(){
+    /** Función para interrumpir el proceso de recuperación antes de generar el link de acceso y redireccionamiento al login */
+    function cancelSoliRecu(){
         // Reestablecer los campos del formulario y mostrar el modal de cancelación
         reset();
 
@@ -121,7 +125,7 @@ export default function FormSoliRecuAcc({ chgForm }){
                             </section>
                             <section className="flex items-center justify-center pt-1">
                                 <button type="submit" disabled={processing} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer">Solicitar recuperación</button>
-                                <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer" onClick={cancelRecu}>Cancelar recuperación</button>
+                                <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer" onClick={cancelSoliRecu}>Cancelar recuperación</button>
                             </section>
                         </form>
                     </section>

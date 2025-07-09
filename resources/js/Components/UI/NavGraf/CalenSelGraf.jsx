@@ -29,7 +29,7 @@ export default function CalenGrafica({ setFecha }){
         locale: Spanish,
         onChange: function(selectedDates, lastDateStr){
             // Evaluar si ya hubo la seleccion de la fecha de inicio
-            if((selectedDates.length > 0) && selectedDates[0]){
+            if((selectedDates.length > 0) && selectedDates[0]) {
                 // Crear la fecha final a partir de la inicial + 3 meses
                 let fechFin = new Date(selectedDates[0]);
                 fechFin.setMonth(fechFin.getMonth() + 3);

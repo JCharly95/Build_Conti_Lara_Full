@@ -12,8 +12,8 @@ class GenLinksHelper
         $linkRes = "";
 
         // Ciclo para generar una cadena de texto con caracteres aleatorios y una longitud de 8 caracteres; NOTA: Los caracteres pueden aparecer en mas de una ocasión
-        for($cont = 0; $cont < $linkLongi; $cont++){
-            $linkRes .= $oriCarLinks[floor((mt_rand() / mt_getrandmax()) * strlen($oriCarLinks))];
+        for($cont = 0; $cont < $linkLongi; $cont++) {
+            $linkRes .= $oriCarLinks[intval(floor((mt_rand() / mt_getrandmax()) * strlen($oriCarLinks)))];
         }
         
         return $linkRes;

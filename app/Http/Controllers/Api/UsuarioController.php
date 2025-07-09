@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Link_Recu;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class UsuarioController extends Controller
             return back()->withErrors($validador);
 
         // Verificar si el usuario existe y autenticar la información ingresada en el formulario
-        if(Auth::attempt(['Correo' => $consulta->dirCorr, 'Contra' => $consulta->valPass])){
+        if(Auth::attempt(['Correo' => $consulta->dirCorr, 'Contra' => $consulta->valPass])) {
             // Crear el objeto helper para generar la fecha de acceso
             $fechAcc = app(FechaServerHelper::class)->genFecha();
 
@@ -75,12 +76,7 @@ class UsuarioController extends Controller
     
                 // Si se obtuvo un error en el proceso se regresará un error de sistema
                 if(array_key_exists('msgError', $resActuFechConve))
-                    return back()->withErrors([
-                        'dirCorr' => $resActuFechConve['msgError']
-                    ]);
-
-                // Establecer la dirección de correo para la sesión
-                $consulta->session()->put('fechUltiAcc', $fechAcc);
+                    return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
     
                 // Si el usuario fue encontrado y autenticado se redirige a la pagina principal, la grafica
                 return redirect()->intended('grafica');
@@ -117,6 +113,11 @@ class UsuarioController extends Controller
                 // Actualizar el valor
                 $usuario->save();
 
+                // Establecer los valores de la sesion con la información del usuario para mostrar en el perfil
+                session(['nomUserSes' => $usuario->Nombre]);
+                session(['fechUltiAcc' => $fechaAcceso]);
+                session(['dirCorSes' => $valDirCor]);
+
                 // Regresar el mensaje de consulta realizada
                 return response()->json(['results' => 'Fecha de acceso actualizada.'], 200);
             } catch (Throwable $exception2) {
@@ -127,52 +128,78 @@ class UsuarioController extends Controller
         }
     }
 
-    public function obteUltiAcc(){
-        // Obtener la información de la sesión
-        //$usuario = User::where('Correo', '=', $dirEmaSes)->select(['Cod_User', 'Correo'])->first();
-
-        // Retornar error si el validador falla
-        /*if(!$usuario)
-            return response()->json(['msgError' => 'Error: El usuario que se referencia no existe.'], 500);
-        */
-
-    }
-
-    /** Metodo para actualizar la contraseña 
+    /** Metodo para actualizar la contraseña en el sistema
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
-    public function nueValContra(Request $consulta){
-        // Primero se verifica que el usuario en cuestion exista
-        $usuario = User::where([
-            ['Cod_User', '=', $consulta->codigo],
-            ['Nombre', '=', $consulta->nomPerso]
-        ])->select(['Cod_User', 'Correo'])->first();
-
-        // Retornar error si el validador falla
-        if(!$usuario)
-            return response()->json(['msgError' => 'Error: El usuario no existe.'], 404);
-
+    public function actuContra(Request $consulta){
         // Validar los campos enviados desde el cliente
         $validador = Validator::make($consulta->all(), [
-            'codigo' => 'required|regex:/^(?!.*\s{2,})([A-Z]{3}[-]?[\d]{4})$/',
-            'nomPerso' => 'required|regex:/^(?!.*\s{2,})([a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+(?:\s[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+)*)$/',
-            'nContraVal' => 'required|regex:/^(?!\s+$)(?=\S{6,20}$)(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*[a-záéíóúüñ])(?=.*\d)(?=.*[^\w\s])[^\s]{6,20}$/u'
+            'nueValContra' => 'required|regex:/^(?!\s+$)(?=\S{6,20}$)(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*[a-záéíóúüñ])(?=.*\d)(?=.*[^\w\s])[^\s]{6,20}$/u',
+            'confNueValContra' => 'required|regex:/^(?!\s+$)(?=\S{6,20}$)(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*[a-záéíóúüñ])(?=.*\d)(?=.*[^\w\s])[^\s]{6,20}$/u'
+        ], [
+            'nueValContra.required' => 'Error: El valor de la nueva contraseña no fue ingresado.',
+            'nueValContra.regex' => 'Error: El valor de la nueva contraseña no cumple con los criterios establecidos.',
+            'confNueValContra.required' => 'Error: El valor de la confirmación para la contraseña no fue ingresado.',
+            'confNueValContra.regex' => 'Error: El valor de la confirmación para la contraseña no cumple con los criterios establecidos.',
         ]);
 
         // Retornar error si el validador falla
         if($validador->fails())
-            return response()->json(['msgError' => 'Error: Favor de revisar la información que utilizó para la actualización de datos.'], 500);
-
-        // Establecer el valor del campo contraseña hasheado (por defecto con 12 rondas) si la consulta desde el cliente trae los campos requeridos
-        if($consulta->has('codigo') && $consulta->has('nomPerso') && $consulta->has('nContraVal'))
-            $usuario->Contra = Hash::make($consulta->nContraVal);
+            return back()->withErrors($validador);
         
-        // Actualizar el valor
-        $usuario->save();
+        // Evaluar si las contraseñas coinciden
+        if(strcmp($consulta->nueValContra, $consulta->confNueValContra) !== 0)
+            return back()->withErrors(['nueValContra' => 'Error: Las contraseñas no coinciden.']);
 
-        // Regresar el mensaje de consulta realizada
-        return response()->json(['results' => 'La información de '.$consulta->nomPerso.' fue actualizada exitosamente.'], 200);
+        try {
+            // Verificar la existencia del usuario
+            $usuario = User::where([
+                ['Cod_User', '=', $consulta->codigo],
+                ['Nombre', '=', $consulta->nomPerso]
+            ])->select(['Cod_User', 'Correo'])->first();
+    
+            // Retornar error si el validador falla
+            if(!$usuario)
+                return back()->withErrors(['nueValContra' => 'Error: El usuario que desea recuperar no se encuentra registrado.']);
 
-        // Pendiente; tengo la duda de ver como crear un "catch" para casos donde no se realice la actualización del registro efectivamente.
+            // Autenticar para revisar si la nueva contraseña es diferente a la anterior
+            if(Auth::attempt(['Contra' => $consulta->nueValContra]))
+                return back()->withErrors(['nueValContra' => 'Error: Favor de actualizar la contraseña apropiadamente.']);
+
+            // Hashear la nueva contraseña y actualizarla en la BD
+            try {
+                // Establecer el nuevo valor de la contraseña como una cadena de caracteres debidamente hasheada
+                if($consulta->has('codigo') && $consulta->has('nomPerso') && $consulta->has('nueValContra'))
+                    $usuario->Contra = Hash::make($consulta->nueValContra);
+
+                // Actualizar el valor de la contraseña en la BD
+                $usuario->save();
+
+                // Una vez actualizado el valor de la contraseña satisfactoriamente, se procederá con el borrado del link para caducarlo
+                try {
+                    $soliBorLink = app(LinkRecuController::class)->borLinkRecu($consulta->linkSis, 1);
+
+                    // Regresar un error si la respuesta de la eliminación no trae información
+                    if(!$soliBorLink->getContent())
+                        return back()->withErrors(['nueValContra' => 'Error: El proceso de recuperación se vio interrumpido por causa del enlace de recuperación. Favor de intentar nuevamente desde su correo.']);
+
+                    // Decodificar la respuesta de la eliminación del link de recuperación como arreglo asociativo
+                    $soliBorLinkConve = $soliBorLink->getData(true);
+
+                    // Si se obtuvo un error en el proceso se regresará un error de sistema
+                    if(array_key_exists('msgError', $soliBorLinkConve))
+                        return back()->withErrors(['nueValContra' => $soliBorLinkConve['msgError']]);
+
+                    // Para este punto todo salio bien y se regresa el aviso de actualización completada
+                    return back()->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
+                } catch(Throwable $exception3) {
+                    return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo procesar el enlace de recuperación apropiadamente. Causa: '.$exception3->getMessage()]);
+                }
+            } catch(Throwable $exception2) {
+                return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo actualizar su contraseña. Causa: '.$exception2->getMessage()]);
+            }
+        } catch(Throwable $exception1) {
+            return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo encontrar al usuario que desea actualizar. Causa: '.$exception1->getMessage()]);
+        }
     }
 }

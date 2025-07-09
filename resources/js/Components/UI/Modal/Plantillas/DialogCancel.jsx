@@ -1,7 +1,7 @@
 /** Funcion para crear los modales de proceso; los que requieran de una respuesta de usuario para confirmar o cancelar el proceso.
  * @param {Object} props - Objeto con las propiedades del componente
  * @param {String} props.textMsg - Cadena de texto con el mensaje a mostrar
- * @param {Boolean} props.opcSel - Bandera booleana que contendra la respuesta seleccionada
+ * @param {React.Dispatch<React.SetStateAction<boolean>>} props.opcSel - Hook de estado booleano para establecer la respuesta seleccionada
  * @returns {JSX.Element} El componente que contiene el aviso a mostrar. */
 export default function DialogCancelar({ textMsg, opcSel }){
     // Preparar un arreglo de strings en caso que el mensaje contenga mas de una oración

@@ -56,7 +56,7 @@ class SensorController extends Controller
         $sensoRegi = $this->listaSenRegi();
 
         // Determinar si se obtuvo una respuesta no vacia
-        if(!empty($sensoRegi->getContent())){
+        if(!empty($sensoRegi->getContent())) {
             // Decodificar el json y determinar que tipo de respuesta se obtuvo acorde a las propiedades de la respuesta
             $senDatos = json_decode($sensoRegi, true);
             
@@ -65,7 +65,7 @@ class SensorController extends Controller
                 return response()->json(['msgError' => $senDatos['msgError']], 404);
 
             // Si no, se recorrera el resultado en busqueda de algún registro previo
-            foreach($senDatos['results'] as $sensor){
+            foreach($senDatos['results'] as $sensor) {
                 if($sensor['ID_'] == $consulta->identiNiag)
                     return response()->json(['msgError' => 'Error: El sensor a registrar ya existe en el sistema.'], 500);
             }

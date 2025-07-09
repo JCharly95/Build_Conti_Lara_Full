@@ -20,7 +20,8 @@ export default function Modal({ titModal, conteModal, isOpen }){
         </section>
     </section>;
 
-    switch(titModal){
+    // Establecer el icono a mostrar en la cabecera del modal acorde al titulo del mensaje solicitado
+    switch(titModal) {
         case "Aviso":
             icono = (<AlertCircle color="blue" size={25} className="mr-2"/>);
             break;

@@ -66,7 +66,7 @@ class ProcReduRegiHelper
         $colecMuest = $colecMuest->values();
         
         // Recorrer el arreglo de valores para obtener los registros correspondientes de cada subarreglo(seccion particionada)
-        foreach($colecMuest as $muestra){
+        foreach($colecMuest as $muestra) {
             // Obtener los valores minimo y maximo de la muestra
             $valMinMues = $muestra->min('VALUE');
             $valMaxMues = $muestra->max('VALUE');
