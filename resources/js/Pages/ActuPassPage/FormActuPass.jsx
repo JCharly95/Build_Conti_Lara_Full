@@ -130,7 +130,7 @@ export default function FormActuContra({ infoSes, procResp }){
     function cancelRecu(){
         // Si se opta por cancelar la recuperacion, se lanzará un modal de confirmacion previo a realizar el cambio
         setModalTitu("Cancelar Recuperación de Contraseña");
-        setModalConte(<DialogCancelar textMsg="¿Esta seguro de cancelar la recuperación de su contraseña?" opcSel={handleModalCancel} />);
+        setModalConte(<DialogCancelar textMsg="¿Esta seguro que desea cancelar su solicitud de recuperación?" textSoli="solicitud" opcSel={handleModalCancel} />);
         setModalOpen(true);
     }
 
