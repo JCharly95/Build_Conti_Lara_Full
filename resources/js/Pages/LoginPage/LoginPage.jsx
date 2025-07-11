@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { router } from "@inertiajs/react";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import FormAcceso from "../Forms/FormLogin";
@@ -32,19 +33,32 @@ export default function LoginPage({ msgResp, errores }){
         // Agregar un listener al evento de retroceso de navegacion
         window.addEventListener("popstate", handleBack);
         // Remover el listener del evento en el return de la funcion con el fin de mantener el rendimiento del sitio
-        return () => {
-            window.removeEventListener("popstate", handleBack);
-        };
+        return () => ( window.removeEventListener("popstate", handleBack) );
     },[]);
 
     // useEffect para monitorear el resultado obtenido de procesos con resultados satisfactorios y que redirigiran hacia esta pagina, asi como, los errores obtenidos en procesos que tambien redirijan hacia esta pagina 
     useEffect(() => {
         if(msgResp){
-            // Mostrar el modal de aviso satisfactorio para solicitud de recuperación de contraseña realizada
+            // Mostrar el modal de aviso satisfactorio para solicitud de recuperación realizada
             if(msgResp.includes("Correo de recuperación enviado")) {
                 setModalTitu("Correo Enviado");
                 setModalConte(<Dialog textMsg={msgResp}/>);
                 setModalOpen(true);
+
+                setTimeout(() => {
+                    setModalOpen(false);
+                    verFormSoliRecu('FormLogin');
+                }, 4000);
+            }
+
+            // Mostrar el modal de aviso satisfactorio para acceso concedido
+            if(msgResp.includes("Acceso concedido")) {
+                setModalTitu("Acceso");
+                setModalConte(<Dialog textMsg="Bienvenido a Building Continuity"/>);
+                setModalOpen(true);
+                
+                // Redireccionamiento hacia la grafica despues de 2.5 segundos
+                setTimeout( () => ( router.get('/grafica', {}, { replace: true }) ), 2500);
             }
         }
 

@@ -14,6 +14,11 @@ use App\Helpers\FechaServerHelper;
 
 class UsuarioController extends Controller
 {
+    /** Metodo para regresar el nombre del campo username o email que será usado en la autenticación junto con la contraseña */
+    public function username(){
+        return 'Correo';
+    }
+
     /** Metodo para regresar todos los usuarios registrados 
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaUsuarios(){
@@ -52,52 +57,52 @@ class UsuarioController extends Controller
         if($validador->fails())
             return back()->withErrors($validador);
 
-        // Verificar si el usuario existe y autenticar la información ingresada en el formulario
-        if(Auth::attempt(['Correo' => $consulta->dirCorr, 'Contra' => $consulta->valPass])) {
-            // Crear el objeto helper para generar la fecha de acceso
-            $fechAcc = app(FechaServerHelper::class)->genFecha();
+        try {
+            // Buscar al primer usuario que coincida con el correo ingresado en el login
+            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['Nombre', 'Correo', 'UltimoAcceso'])->first();
 
-            // Obtener el correo ingresado
-            $correo = $consulta->dirCorr;
+            // Regresar un error en caso de no encontrar al usuario
+            if(!$usuario)
+                return back()->withErrors(['dirCorr' => 'Error: El usuario ingresado no esta registrado.']);
 
             try {
-                // Actualizar la fecha de acceso en la BD
-                $resActuFech = $this->nueValUltiAcc($correo, $fechAcc);
+                // Autenticar al usuario con la información ingresada en el formulario
+                if(Auth::attempt(['Correo' => $consulta->dirCorr, 'password' => $consulta->valPass])) {
+                    try {
+                        // Actualizar la ultima fecha de acceso en la BD
+                        $resActuFech = $this->nueValUltiAcc($consulta->dirCorr);
 
-                // Regresar un error si la respuesta de la actualización no trae información
-                if(!$resActuFech->getContent())
-                    return back()->withErrors([
-                        'dirCorr' => 'Error: Actualización de la fecha de acceso erronea.',
-                        'valPass' => 'Error: No se pudo actualizar la fecha del ultimo acceso.'
-                    ]);
-                
-                // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
-                $resActuFechConve = $resActuFech->getData(true);
-    
-                // Si se obtuvo un error en el proceso se regresará un error de sistema
-                if(array_key_exists('msgError', $resActuFechConve))
-                    return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
-    
-                // Si el usuario fue encontrado y autenticado se redirige a la pagina principal, la grafica
-                return redirect()->intended('grafica');
-            } catch(Throwable $exception) {
-                return back()->withErrors([
-                    'dirCorr' => 'Error: El usuario no pudo ser autenticado. Causa: '.$exception->getMessage()
-                ]);
+                        // Regresar un error si la respuesta de la actualización no trae información
+                        if(!$resActuFech->getContent())
+                            return back()->withErrors(['dirCorr' => 'Error: No se pudo completar el proceso de acceso.']);
+                        
+                        // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
+                        $resActuFechConve = $resActuFech->getData(true);
+            
+                        // Si se obtuvo un error en el proceso se regresará un error de sistema
+                        if(array_key_exists('msgError', $resActuFechConve))
+                            return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
+            
+                        // Si el usuario fue autenticado se regresa al formulario con mensaje satisfactorio
+                        return back()->with(['results' => 'Acceso concedido. Bienvenido a Building Continuity']);
+                    } catch(Throwable $exception) {
+                        return back()->withErrors([ 'dirCorr' => 'Error: El usuario no pudo acceder. Causa: '.$exception->getMessage()]);
+                    }
+                } else {
+                    return back()->withErrors(['dirCorr' => 'Error: Favor de revisar la información ingresada. El usuario no pudo acceder.']);
+                }
+            } catch (Throwable $exception2) {
+                return back()->withErrors(['dirCorr' => 'Error: El usuario no fue autorizado para acceder. Causa: '.$exception2->getMessage()]);
             }
-        } else {
-            // Regresar al formulario de acceso, modificando el mensaje de error a mostrar
-            return back()->withErrors([
-                'dirCorr' => 'Error: No se encontró el usuario registrado.'
-            ]);
+        } catch(Throwable $exception1) {
+            return back()->withErrors(['dirCorr' => 'Error: No se obtuvo la información con respecto al usuario. Causa: '.$exception1->getMessage()]);
         }
     }
 
     /** Metodo para actualizar la fecha del ultimo acceso 
      * @param String $valDirCor Correo ingresado en el login
-     * @param String $fechaAcceso Fecha de acceso obtenida al autenticar
      * @return \Illuminate\Http\JsonResponse Respuesta JSON del resultado para la actualización de la fecha de acceso */
-    public function nueValUltiAcc(String $valDirCor, String $fechaAcceso){
+    public function nueValUltiAcc(String $valDirCor){
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
             $usuario = User::where('Correo', '=', $valDirCor)->select(['Nombre', 'UltimoAcceso'])->first();
@@ -107,6 +112,9 @@ class UsuarioController extends Controller
                 return response()->json(['msgError' => 'Error: El usuario en cuestión no existe.'], 404);
 
             try {
+                // Crear el objeto helper para la fecha de acceso y generar una fecha
+                $fechaAcceso = app(FechaServerHelper::class)->genFecha();
+
                 // Establecer el valor del ultimo acceso
                 $usuario->UltimoAcceso = $fechaAcceso;
 
@@ -121,7 +129,7 @@ class UsuarioController extends Controller
                 // Regresar el mensaje de consulta realizada
                 return response()->json(['results' => 'Fecha de acceso actualizada.'], 200);
             } catch (Throwable $exception2) {
-                return response()->json(['msgError' => 'Error: La fecha de acceso no fue actualizada. Causa: '.$exception2->getMessage()], 500);
+                return response()->json(['msgError' => 'Error: Procedimiento de acceso corrompido. Causa: '.$exception2->getMessage()], 500);
             }
         } catch(Throwable $exception1) {
             return response()->json(['msgError' => 'Error: El usuario no fue encontrado. Causa: '.$exception1->getMessage()], 500);
@@ -159,14 +167,14 @@ class UsuarioController extends Controller
             $usuario = User::where([
                 ['Cod_User', '=', $consulta->codigo],
                 ['Nombre', '=', $consulta->nomPerso]
-            ])->select(['Cod_User', 'Correo'])->first();
+            ])->select(['Cod_User', 'Correo', 'Contra'])->first();
     
-            // Retornar error si el validador falla
+            // Retornar error si no se encuentra al usuario solicitado
             if(!$usuario)
                 return back()->withErrors(['nueValContra' => 'Error: El usuario que desea recuperar no se encuentra registrado.']);
 
-            // Autenticar para revisar si la nueva contraseña es diferente a la anterior
-            if(Auth::attempt(['Contra' => $consulta->nueValContra]))
+            // Comparar el valor de la nueva contraseña con el actual para revisar si la nueva contraseña es diferente a la anterior
+            if(Hash::check($consulta->nueValContra, $usuario->Contra))
                 return back()->withErrors(['nueValContra' => 'Error: Favor de actualizar la contraseña apropiadamente.']);
 
             // Hashear la nueva contraseña y actualizarla en la BD

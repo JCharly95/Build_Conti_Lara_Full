@@ -13,16 +13,16 @@ Route::get('/', function(Request $consulta){
     $msgRespData = $consulta->session()->get('results');
     $msgErrores = $consulta->session()->get('msgError');
 
-    // Saber si se tiene mensaje de sesion o errores
+    // Si se tienen mensajes de errores o resultados en la sesión, se renderiza la pagina inyectandole la información
     if($msgRespData || $msgErrores) {
         if($msgRespData)
             return Inertia::render('LoginPage/LoginPage', ['msgResp' => $msgRespData]);
 
         if($msgErrores)
             return Inertia::render('LoginPage/LoginPage', ['errores' => $msgErrores]);
-    } else {
-        return Inertia::render('LoginPage/LoginPage');
     }
+    
+    return Inertia::render('LoginPage/LoginPage');
 })->name("main");
 
 Route::get('/grafica', function(){

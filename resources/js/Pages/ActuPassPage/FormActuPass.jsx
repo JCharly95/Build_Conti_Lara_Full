@@ -43,7 +43,7 @@ export default function FormActuContra({ infoSes, procResp }){
             // Mostrar el modal de aviso satisfactorio para solicitud de actualización de contraseña realizada y redirigir al login pasados 2.5 segundos
             if(procResp.includes("La contraseña de")) {
                 setModalTitu("Contraseña Actualizada");
-                setModalConte(<Dialog textMsg={respActuContra}/>);
+                setModalConte(<Dialog textMsg={procResp}/>);
                 setModalOpen(true);
                 setTimeout(() => ( router.get('/', {}, { replace: true }) ), 2500);
             }

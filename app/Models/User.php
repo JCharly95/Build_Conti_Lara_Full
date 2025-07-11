@@ -32,7 +32,8 @@ class User extends Authenticatable
         'Ape_Mat',
         'Nombre',
         'Correo',
-        'UltimoAcceso'
+        'UltimoAcceso',
+        'Contra'
     ];
 
     /** Los atributos que deben ser ocultados para la serialización. (Ocultos en consultas get)
@@ -52,5 +53,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the personalized password field for the user
+     * 
+     * @return string
+     */
+    public function getAuthPassword(){
+        return $this->Contra;
     }
 }

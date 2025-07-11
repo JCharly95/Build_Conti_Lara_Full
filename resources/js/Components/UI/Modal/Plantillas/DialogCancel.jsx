@@ -24,8 +24,8 @@ export default function DialogCancelar({ textMsg, opcSel }){
                 }
             </section>
             <section className="flex items-center justify-center pt-1">
-                <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3" onClick={() => ( opcSel(true) )}>Cancelar recuperación</button>
-                <button type="button" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3" onClick={() => ( opcSel(false) )}>Continuar recuperación</button>
+                <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer" onClick={() => ( opcSel(true) )}>Cancelar recuperación</button>
+                <button type="button" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer" onClick={() => ( opcSel(false) )}>Continuar recuperación</button>
             </section>
         </section>
     );
