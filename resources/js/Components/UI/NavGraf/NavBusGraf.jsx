@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CalenGrafica from "./CalenSelGraf";
 import MenuSelGraf from "./ListSenGraf";
 import Modal from "../Modal/Modal";
@@ -9,16 +9,29 @@ import Dialog from "../Modal/Plantillas/Dialog";
  * @param {React.Dispatch<React.SetStateAction<null>>} props.infoBus - Funcion para establecer la información de la busqueda
  * @returns {JSX.Element} Componente jsx de la barra de navegación para la grafica */
 export default function NavBarGrafica({ infoBus }){
-    // Variable de estado para el nombre del sensor para filtrar la busqueda de la grafica
-    const [sensorBusc, setSensoBusc] = useState('404');
-    // Variable de estado para el arreglo de fechas que devolverá el calendario (es arreglo porque la seleccion en en rango)
-    const [arrFechSel, setArrFechSel] = useState([]);
-    // Variable de estado para la visibilidad de la barra de navegación en moviles
-    const [verBarra, setVerBarra] = useState(false);
-    /* Variables de estado para el modal: titulo, contenido del modal, apertura y cierre */
-    const [modalTitu, setModalTitu] = useState(""),
+    /* Variable de estado para el nombre del sensor que servirá para filtrar la busqueda de la grafica
+    Variable de estado para el arreglo de fechas que devolverá el calendario (es arreglo porque la seleccion en en rango)
+    Variable de estado para la visibilidad de la barra de navegación en moviles
+    Variable de estado para habilitar el boton de la busqueda de información
+    Variables de estado para el modal: titulo, contenido del modal, apertura y cierre */
+    const [sensorBusc, setSensoBusc] = useState('404'),
+    [arrFechSel, setArrFechSel] = useState([]),
+    [verBarra, setVerBarra] = useState(false),
+    [btnBusInfo, setBtnBusInfo] = useState(true),
+    [modalTitu, setModalTitu] = useState(""),
     [modalConte, setModalConte] = useState(<></>),
     [modalOpen, setModalOpen] = useState(false);
+
+    // UseEffect para monitorear el valor de los parametros de busqueda y habilitar/deshabilitar el boton de busqueda
+    useEffect(() => {
+        // Habilitar el boton de busqueda solo si se seleccionó un sensor y se obtuvo un arreglo de fechas
+        if(sensorBusc !== '404' && arrFechSel.length > 0)
+            setBtnBusInfo(false);
+
+        // Deshabilitar el boton de busqueda si se limpio el calendario de selección para las fechas
+        if(sensorBusc !== '404' && arrFechSel.length === 0)
+            setBtnBusInfo(true);
+    }, [sensorBusc, arrFechSel]);
 
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
@@ -29,55 +42,65 @@ export default function NavBarGrafica({ infoBus }){
     /** Funcion para obtener la información del sensor seleccionado o el error en la consulta
      * @param {String} infoSenSel Cadena de texto con la información del sensor concatenada o el error obtenido */
     const obteSensoSel = (infoSenSel) => {
+        // Lanzar el modal de error en la selección del sensor si el la cadena de texto resultante contiene: parte de la cadena selección por defecto, la palabra "error" que significa un error de procesamiento o si no contiene ";" que significa el caracter de concatenación para la información del sensor seleccionado.
         if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error") || !infoSenSel.includes(";")) {
             setModalTitu("Error");
-            setModalConte(<Dialog textMsg={infoSenSel}/>);
+
+            if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error"))
+                setModalConte(<Dialog textMsg={infoSenSel}/>);
+
+            if(!infoSenSel.includes(";"))
+                setModalConte(<Dialog textMsg="Error: La información solicitada no fue debidamente obtenida."/>);
+
             setModalOpen(true);
-        }
+        } 
         setSensoBusc(infoSenSel);
     };
 
     /** Funcion para obtener el arreglo de fechas seleccionadas desde el componente del calendario
-     * @param {Array} valFechSel Arreglo con las fechas seleccionadas para la busqueda */
+     * @param {Array} valFechSel Arreglo con la información de fechas seleccionadas para la busqueda */
     const obteFechasSel = (valFechSel) => {
-        // Solo al seleccionar fechas con flatpickr (en este caso, por la selección rango) se regresa un arreglo
-        if(!Array.isArray(valFechSel)) {
+        // Lanzar el modal de error si se obtuvo un arreglo vacio como respuesta, dando a entender que se limpio la selección (y en la validación previo a la busqueda se tomará el valor por defecto que justo es un arreglo vacio tambien)
+        if(valFechSel.length === 0) {
             setModalTitu("Error");
             setModalConte(<Dialog textMsg="Favor de seleccionar un rango de fechas para hacer la busqueda."/>);
             setModalOpen(true);
-        }
-        setArrFechSel(valFechSel)
+        } 
+        setArrFechSel(valFechSel);
     };
 
-    /** Función para determinar la selección del sensor y la selección del calendario con el rango de fechas */
-    const veriBus = () => {
-        // Previo a hacer la busqueda de valores, se deberá corroborar que se hayan seleccionado valores en los campos del formulario (sensor y calendarios). En caso que no, desplegar el mensaje de error correspondiente al campo faltante
-        // Caso 1: Se busca valor por defecto en todos los campos y en cualquier coincidencia evaluar cual es el campo faltante
-        if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";") || arrFechSel.length == 0 || !Array.isArray(arrFechSel)) {
+    /** Función para validar la información seleccionada en la barra de navegación para la busqueda de datos en la grafica */
+    const valiSelNavBus = () => {
+        // Validar si hubo algun caso de error o ausencia de valores en las selecciones
+        if(sensorBusc === '404' || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";") || arrFechSel.length === 0) {
             // Preparar el encabezado para el modal de error
             setModalTitu("Error");
-            // Caso 2: Establecer si no hubo selección de sensor ni de fechas
-            if((sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) && (arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0)) {
-                setModalConte(<Dialog textMsg="Favor de seleccionar la información solicitada para hacer la busqueda."/>);
-            } else {
-                // Caso 3: Determinar el error de la obtención del sensor
-                if(sensorBusc == "404" || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) {
-                    if(sensorBusc.includes("Error"))
-                        setModalConte(<Dialog textMsg={`${sensorBusc}`}/>);
-                    else
-                        setModalConte(<Dialog textMsg="Favor de seleccionar un sensor de la lista para hacer la busqueda."/>);
-                }
-                // Caso 4: Determinar el error de la obtención del rango de fechas
-                if(arrFechSel.length == 0 || !Array.isArray(arrFechSel) || arrFechSel == 0) {
-                    setModalConte(<Dialog textMsg="Favor de seleccionar un rango de fechas para hacer la busqueda."/>);
-                }
+
+            // Validar si se omitio la selección de los campos
+            if((sensorBusc === '404' || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) && arrFechSel.length === 0)
+                setModalConte(<Dialog textMsg="Error: No se encontró selección de parametros para la busqueda."/>);
+
+            // Validar si solo se omitio la selección del sensor
+            if(sensorBusc === '404' || sensorBusc.includes("Seleccione") || sensorBusc.includes("Error") || !sensorBusc.includes(";")) {
+                if(sensorBusc === '404')
+                    setModalConte(<Dialog textMsg="Error: No se encontró selección del sensor"/>);
+
+                if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error"))
+                    setModalConte(<Dialog textMsg={infoSenSel}/>);
+
+                if(!infoSenSel.includes(";"))
+                    setModalConte(<Dialog textMsg="Error: La información solicitada no fue debidamente obtenida."/>);
             }
-            // Preparar el estado del modal
+
+            // Validar si solo se omitio la selección de las fechas
+            if(arrFechSel.length === 0)
+                setModalConte(<Dialog textMsg="Favor de seleccionar un rango de fechas para hacer la busqueda."/>);
+
+            // Mostrar el modal con su respectivo error
             setModalOpen(true);
-        } else {
+        } else
             // En caso de haber ingresado todos los valores, se establece el objeto con la informacion correspondiente para la busqueda
             infoBus({ infoSensor: sensorBusc, arrFechas: arrFechSel });
-        }
     }
 
     return(
@@ -100,10 +123,11 @@ export default function NavBarGrafica({ infoBus }){
                             <CalenGrafica setFecha={obteFechasSel}/>
                         </section>
                         <section className="block mt-4 lg:inline-block lg:mt-1">
-                            <button type="button" onClick={veriBus} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer">Buscar</button>
+                            <button type="button" onClick={valiSelNavBus} disabled={btnBusInfo} className={`text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 ${(btnBusInfo) ? "bg-gray-500 hover:bg-gray-700 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700 cursor-pointer"}`}>Buscar</button>
                         </section>
                         <section className="block mt-4 lg:mb-0 lg:ml-6 lg:inline-block lg:mt-1">
                             <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer">Agregar Sensor</button>
+                            {/* Siguiente paso: Establecer el contenedor de los formularios dentro del sistema */}
                         </section>
                     </section>
                 </section>

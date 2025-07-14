@@ -105,7 +105,8 @@ class UsuarioController extends Controller
     public function nueValUltiAcc(String $valDirCor){
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
-            $usuario = User::where('Correo', '=', $valDirCor)->select(['Nombre', 'UltimoAcceso'])->first();
+            // NOTA Futura: Si se obtendrá algun modelo de la BD y posteriormente se modificará alguno de sus campos, se deberá omitir el select si no se requiere extraer valores especificos. Pero si es el caso, se deberá incluir el campo de id de la tabla para que Eloquent identifique el registro donde actualizará el valor en cuestión por medio de su id.
+            $usuario = User::where('Correo', '=', $valDirCor)->select(['ID_User', 'UltimoAcceso'])->first();
 
             // Regresar un error en caso de no encontrar al usuario
             if(!$usuario)
@@ -114,10 +115,10 @@ class UsuarioController extends Controller
             try {
                 // Crear el objeto helper para la fecha de acceso y generar una fecha
                 $fechaAcceso = app(FechaServerHelper::class)->genFecha();
-
+                
                 // Establecer el valor del ultimo acceso
                 $usuario->UltimoAcceso = $fechaAcceso;
-
+                
                 // Actualizar el valor
                 $usuario->save();
 
@@ -167,7 +168,7 @@ class UsuarioController extends Controller
             $usuario = User::where([
                 ['Cod_User', '=', $consulta->codigo],
                 ['Nombre', '=', $consulta->nomPerso]
-            ])->select(['Cod_User', 'Correo', 'Contra'])->first();
+            ])->select(['ID_User', 'Cod_User', 'Correo', 'Contra'])->first();
     
             // Retornar error si no se encuentra al usuario solicitado
             if(!$usuario)

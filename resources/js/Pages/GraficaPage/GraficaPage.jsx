@@ -41,7 +41,7 @@ function GraficaPage(){
                 obteRegisGraf(infoBusGraf).then((response) => {
                     // Determinar si la respuesta obtenida fue un arreglo
                     if(Array.isArray(response)) {
-                        // Establecer la información obtenida
+                        // Establecer la información obtenida y cerrar el modal de carga
                         setDatosGraf(response);
                         setModalOpen(false);
                     } else {

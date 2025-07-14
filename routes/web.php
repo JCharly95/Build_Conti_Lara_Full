@@ -76,8 +76,8 @@ Route::post('/valiActuContra', [UsuarioController::class, "actuContra"])->name("
 // Ruta para eliminar el enlace de recuperación aleatorio generado por el sistema con nombre "borrarLinkGenSis" para el enrutamiento de laravel; y "caducar" la solicitud de actualización, tanto si se actualizó el valor como si se canceló la petición
 Route::delete('/borLinkActuPas/{linkSis}/{oriPeti}', [LinkRecuController::class, "borLinkRecu"])->name("borrarLinkGenSis");
 
-// Ruta para obtener los registros de la lista de selección de sensores para la grafica
+// Ruta para obtener los sensores registrados (nombrados) del sistema para la selección en la grafica
 Route::get('/listSenGraf', [SensorController::class, "listaSenRegi"])->name("listaSensoRegis");
 
-// Ruta para consultar los registros de la grafica
+// Ruta para obtener la información de los registros de los sensores para la grafica
 Route::get('/datosGraf', [RegistroSensorController::class, "listaRegistroEspeci"])->name("datosGrafica");

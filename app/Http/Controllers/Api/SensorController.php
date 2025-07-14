@@ -44,7 +44,7 @@ class SensorController extends Controller
             // Regresar la lista de sensores encontrados
             return response()->json(['results' => $listaSenRegi], 200);
         } catch(Throwable $exception) {
-            return response()->json(['msgError' => 'Error: No se regresaron los sensores registrados. Causa: '.$exception->getMessage()], $exception->getCode());
+            return response()->json(['msgError' => 'Error: No se encontraron sensores registrados. Causa: '.$exception->getMessage()], 500);
         }
     }
 

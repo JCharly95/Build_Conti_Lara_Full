@@ -6,14 +6,16 @@ import { Calendar, Trash2, HelpCircle } from 'react-feather';
 import Modal from '../Modal/Modal';
 import Dialog from '../Modal/Plantillas/Dialog';
 
-/**  Función para crear y configurar el componente del calendario para la selección de la grafica
- * @returns {JSX.Element} El componente flatpick del calendario renderizado */
+/** Función que regresa como componente el calendario para la selección del rango de fechas utilizado en la busqueda de datos
+ * @param {Object} props - Objeto con las propiedades a recibir desde el componente padre
+ * @param {function(Array): void} props.setFecha - Funcion para establecer el arreglo de valores con la selección de fechas
+ * @returns {JSX.Element} Componente JSX con el calendario Flatpickr en modo rango para la selección de fechas */
 export default function CalenGrafica({ setFecha }){
     /* Variables de estado para el modal: titulo, contenido del modal, apertura y cierre */
     const [modalTitu, setModalTitu] = useState(""),
     [modalConte, setModalConte] = useState(<></>),
     [modalOpen, setModalOpen] = useState(false);
-    // Referencia al componente flatpick para limpiarlo
+    /** Refencia al calendario flatpickr que se usará para limpiar la selección de fechas */
     const calenRef = useRef(null);
 
     // Mostrar/Ocultar el modal
@@ -28,36 +30,38 @@ export default function CalenGrafica({ setFecha }){
         dateFormat: 'Y-m-d H:i:S',
         locale: Spanish,
         onChange: function(selectedDates, lastDateStr){
-            // Evaluar si ya hubo la seleccion de la fecha de inicio
+            // Determinar si ya se seleccionó la fecha de inicio en el cambio del valor de la referencia (disparado desde el metodo onChange)
             if((selectedDates.length > 0) && selectedDates[0]) {
-                // Crear la fecha final a partir de la inicial + 3 meses
+                // Crear y establecer la fecha final; a partir de la inicial, con un agregado de 3 meses (recordar que getMonth parte del 0)
                 let fechFin = new Date(selectedDates[0]);
-                fechFin.setMonth(fechFin.getMonth() + 3);
-                // Actualizar el valor de la fecha final de Flatpickr desde la referencia aplicandolo a la instancia de Flatpickr contenida en la referencia
+                fechFin.setMonth(fechFin.getMonth() + 2);
+                // Actualizar la propiedad de la fecha final en la referencia de Flapickr que terminará aplicandose en la instancia de Flatpickr por el hook de useRef
                 calenRef.current.flatpickr.set("maxDate", fechFin);
             }
         },
         onClose: function(selectedDates, lastDateStr) {
-            let fechaConveEpoch = selectedDates.map((valFechSel) => {
-                return valFechSel.getTime() / 1000.0;
-            });
-            setFecha(fechaConveEpoch);
+            // Convertir las fechas seleccionadas a formato timestamp (unix_time) y establecerlas como valor de retorno cuando la selección del calendario se cierre (disparado desde el metodo onClose)
+            let fechaConveEpoch = selectedDates.map((valFechSel) => ( valFechSel.getTime() / 1000.0 ));
+            estaReturn(fechaConveEpoch);
         },
     };
+
+    /** Función para establecer el arreglo de regreso por parte del calendario
+     * @param {Array} valor - Arreglo con la respuesta de la selección de la información */
+    const estaReturn = (valor) => ( setFecha(valor) );
 
     return(
         <section className="inline-flex ring-2 ring-inset ring-gray-400 rounded-md border-0 p-0.5 bg-neutral-300">
             <label className="flex items-center justify-between text-black bg-blue-500 font-bold px-0.5 rounded-s border-0 cursor-pointer" htmlFor="CalenSelGraf">
                 <Calendar />
             </label>
-            <Flatpickr id="CalenSelGraf" placeholder="Fechas y Hora de Busqueda" options={optionsCalen} ref={calenRef} className="px-2"/>
+            <Flatpickr id="CalenSelGraf" placeholder="Fecha de Busqueda" options={optionsCalen} ref={calenRef} className="px-2"/>
             <button type="button" className="bg-red-600 text-center text-white px-0.5 rounded-e cursor-pointer mr-1" onClick={() => {
-                if(!calenRef?.current?.flatpickr) return;
+                if(!calenRef?.current?.flatpickr)
+                    return;
                 calenRef.current.flatpickr.clear();
-                setFecha(0);
-            }}>
-                <Trash2 />
-            </button>
+                estaReturn([]);
+            }}><Trash2 /></button>
             <HelpCircle className="cursor-pointer bg-white rounded" onClick={() => {
                 setModalTitu("Aviso");
                 setModalConte(<Dialog textMsg="NOTA: Los minutos y segundos seleccionados serán establecidos en ambas fechas."/>);

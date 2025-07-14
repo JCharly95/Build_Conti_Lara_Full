@@ -50,8 +50,11 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            /*'email_verified_at' => 'datetime',
+            'password' => 'hashed',*/
+            // Castear (transformar) los campos correspondientes al formato de la BD
+            'UltimoAcceso' => 'datetime',
+            'Contra' => 'hashed'
         ];
     }
 
