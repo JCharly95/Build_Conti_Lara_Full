@@ -1,4 +1,4 @@
-/** Funcion para generar una fecha con formato de salida: YYYY-MM-DD; hh:mm:ss
+/** Función para generar una fecha con formato de salida: YYYY-MM-DD; hh:mm:ss
  * @param {string | number | null} valFecha Cadena de texto o numerica con el valor de la fecha a convertir (puede ser omitida)
  * @returns Cadena de texto con la fecha convertida */
 export function getFecha(valFecha){

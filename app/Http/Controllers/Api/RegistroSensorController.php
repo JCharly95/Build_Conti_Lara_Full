@@ -49,7 +49,7 @@ class RegistroSensorController extends Controller
                 // Regresar los registros obtenidos
                 return response()->json(['results' => $results], 200);
             } catch(Throwable $exception) {
-                return response()->json(['msgError' => 'Error: No se obtuvieron los registros de sensores. Causa: '.$exception->getMessage()], $exception->getCode());
+                return response()->json(['msgError' => 'Error: No se obtuvieron los registros de sensores. Causa: '.$exception->getMessage()], 500);
             }
         } else {
             // Proteger la consulta en caso de que el servidor no la pudiera procesar
@@ -64,7 +64,7 @@ class RegistroSensorController extends Controller
                 // Regresar los registros obtenidos
                 return response()->json(['results' => $registros], 200);
             } catch(Throwable $exception) {
-                return response()->json(['msgError' => 'Error: No se obtuvieron los registros de sensores solicitados. Causa: '.$exception->getMessage()], $exception->getCode());
+                return response()->json(['msgError' => 'Error: No se obtuvieron los registros de sensores solicitados. Causa: '.$exception->getMessage()], 500);
             }
         }
     }
@@ -112,7 +112,7 @@ class RegistroSensorController extends Controller
                     // Regresar los registros obtenidos
                     return response()->json(['results' => $infoRes], 200);
                 } catch(Throwable $exception2) {
-                    return response()->json(['msgError' => 'Error: No se regresaron los registros. Causa: '.$exception2->getMessage()], $exception2->getCode());
+                    return response()->json(['msgError' => 'Error: No se regresaron los registros. Causa: '.$exception2->getMessage()], 500);
                 }
             }
             
@@ -129,10 +129,10 @@ class RegistroSensorController extends Controller
                 // Regresar los registros obtenidos posterior al proceso de reducción
                 return response()->json(['results' => $resRedu], 200);
             } catch(Throwable $exception3) {
-                return response()->json(['msgError' => 'Error: El proceso de reducción tuvo problemas y no generó registros. Causa: '.$exception3->getMessage()], $exception3->getCode());
+                return response()->json(['msgError' => 'Error: El proceso de reducción tuvo problemas y no generó registros. Causa: '.$exception3->getMessage()], 500);
             }
         } catch(Throwable $exception1) {
-            return response()->json(['msgError' => 'Error: No se contó la cantidad de registros. Causa: '.$exception1->getMessage()], $exception1->getCode());
+            return response()->json(['msgError' => 'Error: No se contó la cantidad de registros. Causa: '.$exception1->getMessage()], 500);
         }
     }
 }

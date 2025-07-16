@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
-/** Funcion que regresa como componente la lista desplegable que contiene los sensores nombrados en el sistema para seleccionar el que se usará en la busqueda de datos para la grafica
+/** Función que regresa como componente la lista desplegable que contiene los sensores nombrados en el sistema para seleccionar el que se usará en la busqueda de datos para la grafica
  * @param {Object} props - Objeto con las propiedades a recibir desde el componente padre
- * @param {function(string): void} props.resSenSel - Funcion para establecer el sensor de busqueda que tiene un parametro string
+ * @param {function(string): void} props.resSenSel - Función para establecer el sensor de busqueda que tiene un parametro string
  * @returns {JSX.Element} Componente JSX con la lista desplegable de sensores registrados */
 export default function MenuSelGraf({ resSenSel }){
     // Variable de estado para guardar el arreglo que contiene los sensores registrados del sistema
@@ -28,13 +28,14 @@ export default function MenuSelGraf({ resSenSel }){
      * @param {string} valor Información del sensor o contenido del error durante el proceso */
     const valRegreso = (valor) => ( resSenSel(valor) );
 
-    /** Función para establecer la información del elemento seleccionado de la lista cuando el valor de la referencia cambie, es decir, cuando se dispare el evento onChange */
+    /** Función para establecer la información del elemento seleccionado de la lista cuando el valor de la referencia cambie, es decir, cuando se dispare el evento onChange y cuando se pierda el foco de selección en pantalla, es decir, con el evento blur */
     const handleChange = () => ( valRegreso(listaSenRef.current.value) );
 
     return (
-        <select id="menuSelSensor" name="listaSenRegis" className="block w-full h-5/6 bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 pl-1 cursor-pointer" onChange={handleChange} ref={listaSenRef}>
+        <select id="menuSelSensor" name="menuSelSensor" className="block w-full h-5/6 bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 pl-1 cursor-pointer" onChange={handleChange} onBlur={handleChange} ref={listaSenRef}>
             <option key="SenRegi0" value="Seleccione el sensor a buscar...">Seleccione el sensor a buscar...</option>
-            { (arrSenRegi.length > 0 ) ? (arrSenRegi.map( (sensor) => (
+            { (arrSenRegi.length > 0 ) ? ( arrSenRegi.map(
+                (sensor) => (
                     <option key={`SenRegi${sensor.id}`} value={`${sensor.valor};${sensor.nombre};${sensor.unidad}`}>
                         {`${sensor.nombre} (${sensor.unidad})`}
                     </option>
@@ -48,12 +49,12 @@ export default function MenuSelGraf({ resSenSel }){
  * @returns {Promise<Array|String>} Promesa con el resultado de la consulta en el servidor */
 async function obtenerDatos(){
     try {
-        const consulta = await axios.get('/listSenGraf');
+        const consulta = await axios.get('/listaSenGraf');
         return consulta.data.results;
     } catch (errGetSensoRegi) {
-        // Si ocurrio un error en la peticion de busqueda se mostrará aqui
+        // Si ocurrio un error en la petición de busqueda se mostrará aqui
         if (errGetSensoRegi.response) {
-            // Primer caso, el servidor tiró un error 500 programado por no encontrar sensores registrados o porque no se pudo hacer la peticion para consultar información (Error contemplado)
+            // Primer caso, el servidor tiró un error 500 programado por no encontrar sensores registrados o porque no se pudo hacer la petición para consultar información (Error contemplado)
             return(typeof(errGetSensoRegi.response.data.msgError) == "undefined") ? "Error: Selección no disponible, problemas en la obtención de la información. Favor de intentar nuevamente." : errGetSensoRegi.response.data.msgError;
         } else if (errGetSensoRegi.request) {
             // Segundo caso, el cliente lanzó la petición al servidor y este no respondio (Error controlado)
@@ -65,7 +66,7 @@ async function obtenerDatos(){
     }
 }
 
-/** Funcion para ordenar el arreglo de información a mostrar en la lista de selección
+/** Función para ordenar el arreglo de información a mostrar en la lista de selección
  * @param {Array} arrInfo Arreglo resultante de la consulta a BD */
 function ordenarDatos(arrInfo){
     let arrOrdeInfo = arrInfo.map((sensor) => {

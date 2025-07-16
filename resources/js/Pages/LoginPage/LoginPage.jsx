@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
-import FormAcceso from "../Forms/FormLogin";
-import FormSoliRecuAcc from "../Forms/FormSoliRecuPass";
+import FormAcceso from "../../Components/UI/Forms/Externos/FormLogin";
+import FormSoliRecuAcc from "../../Components/UI/Forms/Externos/FormSoliRecuPass";
 
-/** Funcion para renderizar el componente que contiene los formularios fuera de la sesión del sistema
+/** Función para renderizar el componente que contiene los formularios fuera de la sesión del sistema
  * @param {object} props - Objeto con las propiedades ingresadas para la visualización de la pagina
  * @param {string} props.msgResp - Mensaje con el resultado obtenido de un proceso satisfactorio cuando este redireccione hacia el login
  * @param {string} props.errores - Mensaje con los errores obtenidos durante un proceso y este redireccione hacia el login
@@ -23,7 +23,7 @@ export default function LoginPage({ msgResp, errores }){
     useEffect(() => {
         // Agregar un "registro nuevo vacio" al historial de navegacion en la ubicacion actual. PD: Seria el equivalente a window.location en el mismo documento
         window.history.pushState(null, "", window.location.pathname);
-        // Funcion para gestionar la solicitud de regreso
+        // Función para gestionar la solicitud de regreso
         const handleBack = () => {
             // Crear y abrir un modal de error de solicitud
             setModalTitu("Error");
@@ -32,7 +32,7 @@ export default function LoginPage({ msgResp, errores }){
         };
         // Agregar un listener al evento de retroceso de navegacion
         window.addEventListener("popstate", handleBack);
-        // Remover el listener del evento en el return de la funcion con el fin de mantener el rendimiento del sitio
+        // Remover el listener del evento en el return de la Función con el fin de mantener el rendimiento del sitio
         return () => ( window.removeEventListener("popstate", handleBack) );
     },[]);
 

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import CalenGrafica from "./CalenSelGraf";
-import MenuSelGraf from "./ListSenGraf";
+import MenuSelGraf from "./ListaSenGraf";
 import Modal from "../Modal/Modal";
 import Dialog from "../Modal/Plantillas/Dialog";
+import { router } from "@inertiajs/react";
 
-/** Funcion que regresa como componente la barra de busqueda de la informacion para la grafica y recibe una prop: infoBus(object) el cual sirve para establecer y regresar la informacion de busqueda de datos para la grafica 
+/** Función que regresa como componente la barra de busqueda de la información para la grafica y recibe una prop: infoBus(object) el cual sirve para establecer y regresar la información de busqueda de datos para la grafica 
  * @param {Object} props - Objeto con las propiedades a recibir desde el componente padre
- * @param {React.Dispatch<React.SetStateAction<null>>} props.infoBus - Funcion para establecer la información de la busqueda
+ * @param {React.Dispatch<React.SetStateAction<null>>} props.infoBus - Función para establecer la información de la busqueda
  * @returns {JSX.Element} Componente jsx de la barra de navegación para la grafica */
 export default function NavBarGrafica({ infoBus }){
     /* Variable de estado para el nombre del sensor que servirá para filtrar la busqueda de la grafica
@@ -39,25 +40,25 @@ export default function NavBarGrafica({ infoBus }){
     // Mostrar/Ocultar la barra en moviles
     const handleBarra = () => ( setVerBarra(!verBarra) );
 
-    /** Funcion para obtener la información del sensor seleccionado o el error en la consulta
-     * @param {String} infoSenSel Cadena de texto con la información del sensor concatenada o el error obtenido */
+    /** Función para obtener la información del sensor seleccionado o el error en la consulta
+     * @param {string} infoSenSel Cadena de texto con la información del sensor concatenada o el error obtenido */
     const obteSensoSel = (infoSenSel) => {
         // Lanzar el modal de error en la selección del sensor si el la cadena de texto resultante contiene: parte de la cadena selección por defecto, la palabra "error" que significa un error de procesamiento o si no contiene ";" que significa el caracter de concatenación para la información del sensor seleccionado.
         if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error") || !infoSenSel.includes(";")) {
             setModalTitu("Error");
 
-            if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error"))
+            if(infoSenSel.includes("Seleccione") || !infoSenSel.includes(";"))
+                setModalConte(<Dialog textMsg="Error: El sensor seleccionado no es valido, favor de intentar nuevamente."/>);
+
+            if(infoSenSel.includes("Error"))
                 setModalConte(<Dialog textMsg={infoSenSel}/>);
 
-            if(!infoSenSel.includes(";"))
-                setModalConte(<Dialog textMsg="Error: La información solicitada no fue debidamente obtenida."/>);
-
             setModalOpen(true);
-        } 
+        }
         setSensoBusc(infoSenSel);
     };
 
-    /** Funcion para obtener el arreglo de fechas seleccionadas desde el componente del calendario
+    /** Función para obtener el arreglo de fechas seleccionadas desde el componente del calendario
      * @param {Array} valFechSel Arreglo con la información de fechas seleccionadas para la busqueda */
     const obteFechasSel = (valFechSel) => {
         // Lanzar el modal de error si se obtuvo un arreglo vacio como respuesta, dando a entender que se limpio la selección (y en la validación previo a la busqueda se tomará el valor por defecto que justo es un arreglo vacio tambien)
@@ -85,11 +86,11 @@ export default function NavBarGrafica({ infoBus }){
                 if(sensorBusc === '404')
                     setModalConte(<Dialog textMsg="Error: No se encontró selección del sensor"/>);
 
-                if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error"))
-                    setModalConte(<Dialog textMsg={infoSenSel}/>);
+                if(infoSenSel.includes("Seleccione") || !infoSenSel.includes(";"))
+                    setModalConte(<Dialog textMsg="Error: El sensor seleccionado no es valido, favor de intentar nuevamente."/>);
 
-                if(!infoSenSel.includes(";"))
-                    setModalConte(<Dialog textMsg="Error: La información solicitada no fue debidamente obtenida."/>);
+                if(infoSenSel.includes("Error"))
+                    setModalConte(<Dialog textMsg={infoSenSel}/>);
             }
 
             // Validar si solo se omitio la selección de las fechas
@@ -98,9 +99,10 @@ export default function NavBarGrafica({ infoBus }){
 
             // Mostrar el modal con su respectivo error
             setModalOpen(true);
-        } else
-            // En caso de haber ingresado todos los valores, se establece el objeto con la informacion correspondiente para la busqueda
+        } else {
+            // En caso de haber ingresado todos los valores, se establece el objeto con la información correspondiente para la busqueda
             infoBus({ infoSensor: sensorBusc, arrFechas: arrFechSel });
+        }
     }
 
     return(
@@ -126,8 +128,7 @@ export default function NavBarGrafica({ infoBus }){
                             <button type="button" onClick={valiSelNavBus} disabled={btnBusInfo} className={`text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 ${(btnBusInfo) ? "bg-gray-500 hover:bg-gray-700 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700 cursor-pointer"}`}>Buscar</button>
                         </section>
                         <section className="block mt-4 lg:mb-0 lg:ml-6 lg:inline-block lg:mt-1">
-                            <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer">Agregar Sensor</button>
-                            {/* Siguiente paso: Establecer el contenedor de los formularios dentro del sistema */}
+                            <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer" onClick={() => (router.get('/formInter', { formuSoli: "Registro_Sensor" }, { replace: true }))}>Agregar Sensor</button>
                         </section>
                     </section>
                 </section>

@@ -168,7 +168,7 @@ class UsuarioController extends Controller
             $usuario = User::where([
                 ['Cod_User', '=', $consulta->codigo],
                 ['Nombre', '=', $consulta->nomPerso]
-            ])->select(['ID_User', 'Cod_User', 'Correo', 'Contra'])->first();
+            ])->select(['ID_User', 'Cod_User', 'Nombre', 'Contra'])->first();
     
             // Retornar error si no se encuentra al usuario solicitado
             if(!$usuario)
@@ -180,8 +180,10 @@ class UsuarioController extends Controller
 
             // Hashear la nueva contraseña y actualizarla en la BD
             try {
-                // Establecer el nuevo valor de la contraseña como una cadena de caracteres debidamente hasheada
-                if($consulta->has('codigo') && $consulta->has('nomPerso') && $consulta->has('nueValContra'))
+                /* Establecer el nuevo valor de la contraseña como un string hasheado si se cumplen todas condiciones a continuación:
+                 * La consulta HTTP que llama la función tiene el parametro de entrada llamado "codigo" y si la información de este parametro es exactamente igual al parametro "Cod_User" obtenido del usuario en la BD
+                 * La consulta HTTP que llama la función tiene el parametro de entrada llamado "nomPerso" y si la información de este parametro es exactamente igual al parametro "Nombre" obtenido del usuario en la BD */
+                if(($consulta->has('codigo') && ($consulta->codigo === $usuario->Cod_User)) && ($consulta->has('nomPerso') && ($consulta->nomPerso === $usuario->Nombre)) && $consulta->has('nueValContra'))
                     $usuario->Contra = Hash::make($consulta->nueValContra);
 
                 // Actualizar el valor de la contraseña en la BD
@@ -202,9 +204,9 @@ class UsuarioController extends Controller
                     if(array_key_exists('msgError', $soliBorLinkConve))
                         return back()->withErrors(['nueValContra' => $soliBorLinkConve['msgError']]);
 
-                    // Borrar la información sensible de la sesión y redirigir al login con el aviso de proceso concluido en los elementos de sesión
+                    // Borrar la información sensible de la sesión y regresar al formulario de actualización para mostrar el mensaje de proceso concluido satisfactoriamente
                     $consulta->session()->forget('form');
-                    return redirect()->route('vistaFormActu')->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
+                    return back()->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
                 } catch(Throwable $exception3) {
                     return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo procesar el enlace de recuperación apropiadamente. Causa: '.$exception3->getMessage()]);
                 }

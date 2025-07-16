@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useForm, router } from "@inertiajs/react";
-import Modal from "../../Components/UI/Modal/Modal";
-import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
+import { useForm } from "@inertiajs/react";
+import Modal from "../../Modal/Modal";
+import Dialog from "../../Modal/Plantillas/Dialog";
 import { FileText } from "react-feather";
 
 /** Función para renderizar el formulario para la solicitud de recuperación de acceso
@@ -9,7 +9,7 @@ import { FileText } from "react-feather";
  * @param {React.SetStateAction<string>} props.chgForm - Función para establecer el nombre del formulario a cambiar, mostrar o regresar
  * @returns {JSX.Element} Componente del formulario de solicitud para recuperación de acceso */
 export default function FormSoliRecuAcc({ chgForm }){
-     /* Variables de trabajo:
+    /* Variables de trabajo:
     Variables de estado para el modal: apertura y cierre, titulo, contenido del modal
     Hook para el formulario cortesia de inertia para poder controlar el estado de los campos del formulario */
     const [modalTitu, setModalTitu] = useState(""),
@@ -23,7 +23,7 @@ export default function FormSoliRecuAcc({ chgForm }){
         dirCorUser: ''
     });
 
-    // useEffect para monitorear los errores obtenidos en la validacion
+    // useEffect para monitorear los errores obtenidos en la validación
     useEffect(() => {
         if (errors.codUser || errors.nomUser || errors.apePatUser || errors.apeMatUser || errors.dirCorUser) {
             setModalTitu("Error");
@@ -35,7 +35,8 @@ export default function FormSoliRecuAcc({ chgForm }){
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
 
-    // Funcion de envio para validación y envio del formulario
+    /** Función para validación y envio del formulario
+     * @param {React.FormEventHandler<HTMLFormElement>} event - Evento del formulario con la información de este */
     function submitRecuAccForm(event){
         event.preventDefault();
         // Enviar a la ruta de procesamiento en el back
@@ -80,7 +81,7 @@ export default function FormSoliRecuAcc({ chgForm }){
                                     </label>
                                 </section>
                                 <section className="md:w-2/3">
-                                    <input id="codiUser" type="text" value={data.codUser} onChange={(ev) => setData('codUser', ev.target.value)} placeholder="MXN-dddd"  autoComplete="on" className="shadow shadow-emerald-300 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+                                    <input id="codiUser" type="text" value={data.codUser} onChange={(ev) => setData('codUser', ev.target.value)} placeholder="MXN-dddd" autoComplete="on" className="shadow shadow-emerald-300 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
                                 </section>
                             </section>            
                             <section className="md:flex md:items-center mb-2">

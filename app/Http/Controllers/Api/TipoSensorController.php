@@ -25,18 +25,20 @@ class TipoSensorController extends Controller
             // Regresar la lista de tipos de sensores encontrados
             return response()->json(['results' => $senTipos], 200);
         } catch(Throwable $exception) {
-            return response()->json(['msgError' => 'Error: No se obtuvieron los tipos de sensores. Causa: '.$exception->getMessage()], $exception->getCode());
+            return response()->json(['msgError' => 'Error: No se obtuvieron los tipos de sensores. Causa: '.$exception->getMessage()], 500);
         }
     }
 
-    /** Metodo para regresar todos los sensores que no esten nombrados 
+    /** Metodo para regresar todos los sensores que no esten nombrados
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaSensoresNoRegi(){
         // Proteger la consulta de obtención del identificador foraneo de los sensores nombrados
         try {
+            // Obtener todos los valores correspondientes a una clave, o en este caso, al nombre de una columna
             $listTipoID = Sensor::pluck('Tipo_ID');
             // Proteger la consulta unión para obtener los sensores que no esten nombrados (registrados)
             try {
+                // Obtener todos los registros cuyo valor de una determinada columna no se encuentren en un arreglo de valores dado
                 $listaSensores = Tipo_Sensor::whereNotIn('ID', $listTipoID)->select('ID', 'ID_')->get();
         
                 // Regresar un error si no se encontraron sensores sin registrar
@@ -46,10 +48,10 @@ class TipoSensorController extends Controller
                 // Regresar la lista de sensores sin registrar
                 return response()->json(['results' => $listaSensores], 200);
             } catch(Throwable $exception2) {
-                return response()->json(['msgError' => 'Error: No se encontraron sensores sin registrar. Causa: '.$exception2->getMessage()], $exception2->getCode());
+                return response()->json(['msgError' => 'Error: No se encontraron sensores sin registrar. Causa: '.$exception2->getMessage()], 500);
             }
         } catch(Throwable $exception1) {
-            return response()->json(['msgError' => 'Error: No se obtuvieron los identificadores relacionales de los sensores nombrados. Causa: '.$exception1->getMessage()], $exception1->getCode());
+            return response()->json(['msgError' => 'Error: No se obtuvieron los identificadores relacionales de los sensores nombrados. Causa: '.$exception1->getMessage()], 500);
         }
     }
 }

@@ -3,15 +3,15 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { getFecha } from "./fecha";
 
-// Informacion de configuracion para la pagina:
+//Información de configuracion para la pagina:
 /* Segun la documentacion oficial de jsPDF; la configuracion por defecto para el PDF es; Tamaño de papel: A4, Orientacion: Vertical (Portrait) y Unidad de medicion: milimetros.
 Para este caso, se creará un documento con la configuracion de margen "Normal" y el tamaño de hoja: "carta"; acorde a las medidas que maneja word para darle similitud a lo que las personas estan acostumbradas a ver. Para ello, el margen normal de word maneja las medidas: Superior: 2.5 cm, Inferior: 2.5 cm, Izquierda: 3 cm, Derecha: 3 cm y el tamaño de hoja carta tiene las medidas: 21.59 cm * 27.94 cm.
 Como es mas facil manejar los cambios de tamaños en mm, sera necesario contemplar la transformacion de cm a mm, para ello se tiene que:
 cm -> mm = cm * 10 */
     
-/** Funcion para generar los reportes PDF de la grafica
+/** Función para generar los reportes PDF de la grafica
  * @param {React.RefObject} areaGrafica Referencia del area de la grafica (el equivalente a getElementById)
- * @param {Array} datos Arreglo de arreglos con la informacion de los registro de la grafica, formato; [fecha, valor]
+ * @param {Array} datos Arreglo de arreglos con la información de los registro de la grafica, formato; [fecha, valor]
  * @param {string} nomSensor Nombre del sensor a mostrar en el reporte obtenido desde la lista de la barra de busqueda
  * @param {string} uniMedi Nombre de la unidad de medición que uso el sensor
  * @param {number} fechaInicio Cadena de texto con la fecha de inicio proporcionada por el calendario
@@ -62,9 +62,9 @@ export default async function CrearReportePDF(areaGrafica, datos, nomSensor, uni
     // Agregar la seccion de datos generales
     doc.text("Datos generales de búsqueda:", (pageWidth / 2), contPosVerti, null, null, "center");
     contPosVerti += 5;
-    // Calcular los datos generales y obtener el objeto con la informacion de los mismos
+    // Calcular los datos generales y obtener el objeto con la información de los mismos
     let datosGen = calcuDatosTbl(datos);
-    // Preparar la configuracion para la tabla de informacion general
+    // Preparar la configuracion para la tabla de información general
     let configTblGen = {
         startY: contPosVerti,
         tableWidth: maxLineWidth,
@@ -86,7 +86,7 @@ export default async function CrearReportePDF(areaGrafica, datos, nomSensor, uni
     // Agregar la tabla de datos generales y actualizar el posicionador vertical
     contPosVerti = agreTbl(doc, configTblGen) + 10;
 
-    // Para este punto, no queda mucho espacio en la hoja, por lo que la informacion de busqueda especifica será agregada en una hoja nueva y se reestablecera el posicionador vertical
+    // Para este punto, no queda mucho espacio en la hoja, por lo que la información de busqueda especifica será agregada en una hoja nueva y se reestablecera el posicionador vertical
     doc.addPage("letter","portrait");
     contPosVerti = marginTopBot;
 
@@ -102,9 +102,9 @@ export default async function CrearReportePDF(areaGrafica, datos, nomSensor, uni
     doc.save(`Reporte Building Continuity ${nomSensor} ${fechaCreaRepor.split(";")[0]}.pdf`);
 }
 
-/** Funcion para generar y agregar una tabla al documento PDF, ingresando la informacion correspondiente desde la llamada de la funcion
+/** Función para generar y agregar una tabla al documento PDF, ingresando la información correspondiente desde la llamada de la función
  * @param {jsPDF} objDoc Objecto que contiene el documento PDF del reporte
- * @param {Object} objConfig Objeto con la configuracion e informacion establecida para generar la tabla
+ * @param {Object} objConfig Objeto con la configuracion e información establecida para generar la tabla
  * @returns {number} La posicion vertical del la ultima tabla dibujada cortesia de autotable */
 function agreTbl(objDoc, objConfig){
     // Generar y agregar la tabla solicitada en el documento
@@ -113,8 +113,8 @@ function agreTbl(objDoc, objConfig){
     return objDoc.lastAutoTable.finalY;
 }
 
-/** Funcion para calcular la informacion de la tabla general de valores
- * @param {Array} arrInfo Arreglo de arreglos con la informacion en formato [fecha, valor] */
+/** Función para calcular la información de la tabla general de valores
+ * @param {Array} arrInfo Arreglo de arreglos con la información en formato [fecha, valor] */
 function calcuDatosTbl(arrInfo){
     let objRes = { valorMin: 0, fechaValMin: "", valorMax: 0, fechaValMax: "", valorProm: 0 },
     arrDatos = arrInfo.map((registro) => (registro[1]));
@@ -126,7 +126,7 @@ function calcuDatosTbl(arrInfo){
     // Calcular el valor minimo
     let valMin = arrDatos.reduce((valPrev, valActu) => ((valActu < valPrev) ? valActu : valPrev));
 
-    // Agregar la informacion al objeto de respuesta
+    // Agregar la información al objeto de respuesta
     objRes.valorMin = valMin;
     objRes.valorMax = valMax;
     objRes.valorProm = promedio;
@@ -145,8 +145,8 @@ function calcuDatosTbl(arrInfo){
     return objRes;
 }
 
-/** Funcion para calcular y pintar la informacion de las tablas de busqueda especifica
- * @param {Array} arrInfo Arreglo de arreglos con la informacion en formato [fecha, valor]
+/** Función para calcular y pintar la información de las tablas de busqueda especifica
+ * @param {Array} arrInfo Arreglo de arreglos con la información en formato [fecha, valor]
  * @param {jsPDF} objDoc Objecto que contiene el documento PDF del reporte
  * @param {number} iniVerti Ubicacion de la coordenada vertical para comenzar a pintar
  * @param {number} ancho Longitud de anchura para las tablas de datos
@@ -159,7 +159,7 @@ function calcuDatosEspeci(arrInfo, objDoc, iniVerti, ancho, margen){
     // Crear el contador de posiciones para recorrer el arreglo de fechas obtenido y una copia de la coordenada vertical para estarla actualizando acorde a la generacion de tablas
     let posArrFech = 0, contPosVerti = iniVerti;
     
-    // Crear un ciclo para obtener la informacion de cada tabla y pintarla en el documento. OJO: Este ciclo funciona en cuestion al posicionador que se usara para recorrer el arreglo de las fechas filtradas y este continuará hasta que se hayan recorrido todos los valores del arreglo de fechas
+    // Crear un ciclo para obtener la información de cada tabla y pintarla en el documento. OJO: Este ciclo Funcióna en cuestion al posicionador que se usara para recorrer el arreglo de las fechas filtradas y este continuará hasta que se hayan recorrido todos los valores del arreglo de fechas
     while(posArrFech < arrFechasNoRep.length) {
         // Obtener la fecha a comparar en la iteracion
         let fechaCmp = arrFechasNoRep[posArrFech];
@@ -194,7 +194,7 @@ function calcuDatosEspeci(arrInfo, objDoc, iniVerti, ancho, margen){
     return objDoc.lastAutoTable.finalY;
 }
 
-/** Funcion para agregar los pies de pagina en el reporte
+/** Función para agregar los pies de pagina en el reporte
  * @param {jsPDF} objDoc Objecto que contiene el documento PDF del reporte
  * @param {number} pageHeight Altura de pagina configurada
  * @param {number} pageWidth Anchura de pagina configurada */

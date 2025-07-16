@@ -6,7 +6,7 @@ import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import PagesLayout from "../../Layouts/PagesLayout/PagesLayout";
 
-/** Funcion para renderizar el componente que contiene la pagina de la grafica
+/** Función para renderizar el componente que contiene la pagina de la grafica
  * @returns {JSX.Element} Pagina de grafica renderizada */
 function GraficaPage(){
     // Variable de estado para la información de la barra de navegación
@@ -24,7 +24,7 @@ function GraficaPage(){
 
     // useEffect para monitorear el cambio de datos en la seleccion
     useEffect(() => {
-        // En lugar de utilizar una funcion receptora, el useEffect estará monitoreando el cambio de valores desde la barra
+        // En lugar de utilizar una Función receptora, el useEffect estará monitoreando el cambio de valores desde la barra
         if(infoBusGraf) {
             // Lanzar el modal de carga para la obtención de valores
             setModalTitu("Cargando");
@@ -37,7 +37,7 @@ function GraficaPage(){
                 setModalConte(<Dialog textMsg="Error: No puede seleccionar la misma fecha y hora para buscar."/>);
                 setModalOpen(true);
             } else {
-                // Lanzar la consulta para la obtencion de informacion
+                // Lanzar la consulta para la obtencion de información
                 obteRegisGraf(infoBusGraf).then((response) => {
                     // Determinar si la respuesta obtenida fue un arreglo
                     if(Array.isArray(response)) {
@@ -73,9 +73,9 @@ function GraficaPage(){
 GraficaPage.layout = (page) => <PagesLayout children={page} />
 export default GraficaPage;
 
-/** Funcion para obtener los registros especificados por el filtrado de sensor y fechas
+/** Función para obtener los registros especificados por el filtrado de sensor y fechas
  * @param {Object} infoBus Objeto con el identificador del sensor y el arreglo con las fechas del rango de busqueda
- * @returns {Promise<Array | String>} Promesa con arreglo de informacion resultante o mensaje de error en caso de acontecer uno */
+ * @returns {Promise<Array | String>} Promesa con arreglo de información resultante o mensaje de error en caso de acontecer uno */
 export async function obteRegisGraf(infoBus){
     try {
         const consulta = await axios.get('/datosGraf', {
@@ -88,9 +88,9 @@ export async function obteRegisGraf(infoBus){
         });
         return consulta.data.results;
     } catch (errObteRegSenso) {
-        // Si ocurrio un error en la peticion de busqueda se mostrará aqui
+        // Si ocurrio un error en la petición de busqueda se mostrará aqui
         if (errObteRegSenso.response) {
-            // Primer caso, el servidor tiró un error 500 programado por no encontrar el usuario con la información del formulario o porque no se pudo hacer la peticion para consultar información (Error contemplado)
+            // Primer caso, el servidor tiró un error 500 programado por no encontrar el usuario con la información del formulario o porque no se pudo hacer la petición para consultar información (Error contemplado)
             return (typeof(errObteRegSenso.response.data.msgError) == "undefined") ? "Error: Registros de sensor no disponible caso 1, favor de intentar mas tarde." : errObteRegSenso.response.data.msgError;
         } else if (errObteRegSenso.request) {
             // Segundo caso, el cliente lanzó la petición al servidor y este no respondio (Error controlado)

@@ -26,7 +26,7 @@ class SensorController extends Controller
             // Regresar la lista de sensores encontrados
             return response()->json(['results' => $sensores], 200);
         } catch(Throwable $exception) {
-            return response()->json(['msgError' => 'Error: No se obtuvieron los sensores nombrados. Causa: '.$exception->getMessage()], $exception->getCode());
+            return response()->json(['msgError' => 'Error: No se obtuvieron los sensores nombrados. Causa: '.$exception->getMessage()], 500);
         }
     }
 
@@ -52,63 +52,76 @@ class SensorController extends Controller
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
      * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function regiSensor(Request $consulta){
-        // Obtener la lista de sensores registrados y verificar si el sensor en cuestión ya existe en el sistema
-        $sensoRegi = $this->listaSenRegi();
+        // Agregar a la sesión el formulario que se mostrará en el contenedor de formularios internos en caso de regresar con errores o al finalizar el registro
+        $consulta->session()->put('formuSoli', "Registro_Sensor");
 
-        // Determinar si se obtuvo una respuesta no vacia
-        if(!empty($sensoRegi->getContent())) {
-            // Decodificar el json y determinar que tipo de respuesta se obtuvo acorde a las propiedades de la respuesta
-            $senDatos = json_decode($sensoRegi, true);
-            
+        try {
+            // Obtener la lista de sensores registrados
+            $sensoRegi = $this->listaSenRegi();
+
+            // Regresar un error si la respuesta de los sensores no trae información
+            if(!$sensoRegi->getContent())
+                return back()->withErrors(['idNiagSensor' => 'Error: El sistema no encontró parte de la información vitalicia para el proceso. Favor de intentar nuevamente.']);
+
+            // Decodificar la respuesta de la lista de sensores registrados como arreglo asociativo
+            $senDatos = $sensoRegi->getData(true);
+
             // Si se obtuvo un error de busqueda se regresará un error de procesamiento del sistema
             if(array_key_exists('msgError', $senDatos))
-                return response()->json(['msgError' => $senDatos['msgError']], 404);
+                return back()->withErrors(['idNiagSensor' => $senDatos['msgError']]);
 
             // Si no, se recorrera el resultado en busqueda de algún registro previo
             foreach($senDatos['results'] as $sensor) {
-                if($sensor['ID_'] == $consulta->identiNiag)
-                    return response()->json(['msgError' => 'Error: El sensor a registrar ya existe en el sistema.'], 500);
+                if($sensor['ID_'] == $consulta->idNiagSensor)
+                    return back()->withErrors(['nomSensor' => 'Error: El sensor que desea registrar ya existe en el sistema.']);
             }
+        } catch(Throwable $exception) {
+            return back()->withErrors(['nomSensor' => 'Error: El sistema no pudo encontrar sensores registrados. Causa: '.$exception->getMessage()]);
         }
         
         // Si no se ha regresado error hasta este punto, continuamos con el proceso, en este caso validar los campos
         $validador = Validator::make($consulta->all(), [
-            'identiNiag' => 'required',
-            'nombre' => 'required'
+            'nomSensor' => 'required',
+            'idNiagSensor' => 'required'
+        ], [
+            'nomSensor.required' => 'Error: Favor de ingresar el nombre del sensor para ser registrado.',
+            'idNiagSensor.required' => 'Error: Favor de seleccionar uno de los sensores disponibles.'
         ]);
 
         // Retornar error si el validador falla
         if($validador->fails())
-            return response()->json(['msgError' => 'Error: No se ingresó información para el registro del sensor.'], 500);
+            return back()->withErrors($validador);
 
         // Proteger la consulta para la obtención del ID del tipo de sensor
         try {
             // Obtener el id del tipo de sensor a registrar
-            $idTipoSen = Tipo_Sensor::where('ID_', '=', $consulta->identiNiag)->value('ID');
+            $idTipoSen = Tipo_Sensor::where('ID_', '=', $consulta->idNiagSensor)->value('ID');
     
             // Regresar un error porque no se encontró el id del tipo de sensor
             if(!$idTipoSen)
-                return response()->json(['msgError' => 'Error: No hay el tipo de sensor solicitado.'], 500);
+                return back()->withErrors(['idNiagSensor' => 'Error: No se encontró el sensor con el identificador niagara seleccionado.']);
             
             // Proteger la consulta para el registro del sensor
             try {
-                // Registrar el sensor en el sistema (Insert a la BD)
+                // Registrar/nombrar el sensor en el sistema para identificarlo con un nombre propio
                 $sensor = Sensor::create([
-                    'Nombre' => $consulta->nombre,
-                    'Tipo_ID' => $consulta->identiNiag
+                    'Nombre' => $consulta->nomSensor,
+                    'Tipo_ID' => $idTipoSen
                 ]);
 
                 // Regresar un error si no se pudo registrar el sensor
-                if(!$idTipoSen)
-                    return response()->json(['msgError' => 'Error: El sensor'.$consulta->nombre.' no pudo ser registrado.'], 500);
+                if(!$sensor)
+                    return back()->withErrors(['nomSensor' => 'Error: El sensor '.$consulta->nomSensor.' no pudo ser registrado.']);
                 
-                // Regresar el mensaje de consulta realizada
-                return response()->json(['results' => 'El sensor'.$consulta->nombre.' fue registrado exitosamente.'], 200);
+                // Regresar al usuario al formulario de registro con el mensaje de proceso concluido satisfactoriamente
+                return back()->with('results', 'El sensor '.$consulta->nomSensor.' fue registrado exitosamente.');
+                // Redireccionar al usuario al formulario de registro con mensaje de proceso concluido satisfactoriamente
+                //return redirect()->route('vistaFormInterno')->with('results', 'El sensor '.$consulta->nomSensor.' fue registrado exitosamente.');
             } catch(Throwable $exception2) {
-                return response()->json(['msgError' => 'Error: El sensor'.$consulta->nombre.' no fue registrado. Causa: '.$exception2->getMessage()], $exception2->getCode());
+                return back()->withErrors(['nomSensor' => 'Error: El sensor '.$consulta->nomSensor.' no fue registrado. Causa: '.$exception2->getMessage()]);
             }
         } catch(Throwable $exception1) {
-            return response()->json(['msgError' => 'Error: No se encontró el tipo de sensor. Causa: '.$exception1->getMessage()], $exception1->getCode());
+            return back()->withErrors(['idNiagSensor' => 'Error: no se encontró algun sensor con la denominación niagara dada. Causa: '.$exception1->getMessage()]);
         }
     }
 }

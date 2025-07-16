@@ -1,7 +1,7 @@
 /* Importar todos los iconos de encabezado contemplados para usar en los modales */
 import { AlertTriangle, AlertCircle, AlertOctagon, CheckCircle, FileText, Upload, Key, FilePlus, LogOut, Clock, Loader, Mail } from "react-feather";
 
-/** Funcion para establecer el contenedor de los modales.
+/** Función para establecer el contenedor de los modales.
  * @param {Object} props - Objeto con las propiedades del modal.
  * @param {string} props.titModal - Cadena de texto con el título que se muestra en el modal.
  * @param {React.ReactNode} props.conteModal - Contenido que se renderiza dentro del modal.

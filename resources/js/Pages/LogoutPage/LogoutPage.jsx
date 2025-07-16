@@ -3,11 +3,11 @@ import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import { router } from "@inertiajs/react";
 import PagesLayout from "../../Layouts/PagesLayout/PagesLayout";
 
-/** Funcion para renderizar el componente que contiene la pagina para el cierre de sesión
+/** Función para renderizar el componente que contiene la pagina para el cierre de sesión
  * @returns {JSX.Element} Pagina cierre de sesión renderizada */
 function LogoutPage(){
-    // Redireccionamiento hacia el login despues de 2 segundos
-    setTimeout( () => ( router.get('/', {}, { replace: true }) ), 2000);
+    // Redireccionamiento hacia el login despues de 2.5 segundos
+    setTimeout( () => ( router.get('/', {}, { replace: true }) ), 2500);
     
     return(
         <Modal titModal="Cerrar Sesión" conteModal={<Dialog textMsg="Gracias por su visita. Nos vemos después"/>} isOpen={true} />

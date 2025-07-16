@@ -3,7 +3,7 @@ import Pie_Pagina from "../../Components/UI/Pie/Pie_Gen";
 /*import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";*/
 
-/** Funcion para establecer el root layout del sistema
+/** Función para establecer el root layout del sistema
  * @param {React.ReactNode} children - Nodo de react con el contenido a mostrar en la pagina
  * @returns {JSX.Element} - Componente JSX con el contenido de la pagina */
 export default function MainLayout({ children }){

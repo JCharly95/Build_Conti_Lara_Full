@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { Eye, EyeOff } from "react-feather";
-import Modal from "../../Components/UI/Modal/Modal";
-import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
+import Modal from "../../Modal/Modal";
+import Dialog from "../../Modal/Plantillas/Dialog";
 
 /** Función para renderizar el formulario de acceso
  * @param {object} props - Objeto con las propiedades ingresadas para la visualización del formulario
@@ -51,7 +51,7 @@ export default function FormAcceso({ chgForm }){
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
 
-    // Funcion de envio para validacion y envio del formulario (refabricada para la incorporación del hook)
+    // Función de envio para validacion y envio del formulario (refabricada para la incorporación del hook)
     function submitLogForm(event){
         event.preventDefault();
         post('/valiLog');

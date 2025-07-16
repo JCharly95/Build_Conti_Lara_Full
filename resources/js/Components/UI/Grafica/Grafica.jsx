@@ -62,7 +62,7 @@ function desgloDatos(arrInfoBD){
     return { dataGraf: arrDatos, labelsGraf: arrLabels };
 }
 
-/** Funcion para establecer las opciones por defecto para la grafica
+/** Función para establecer las opciones por defecto para la grafica
  * @returns Objeto de configuracion inicial Apexchart para renderizar una grafica vacia */
 function opcsDefecGraf(){
     return {
@@ -84,7 +84,7 @@ function opcsDefecGraf(){
     }
 }
 
-/** Funcion para establecer las opciones de la grafica cuando no se encontró información
+/** Función para establecer las opciones de la grafica cuando no se encontró información
  * @returns Objeto de configuración para renderizar una grafica sin datos */
 function noDatosGraf(){
     return {
@@ -112,7 +112,7 @@ function noDatosGraf(){
     }
 }
 
-/** Funcion para establecer las opciones de la grafica
+/** Función para establecer las opciones de la grafica
  * @param {React.RefObject} areaGrafRef - Referencia del area de la grafica (el equivalente a getElementById)
  * @param {Array} grafDatos - Arreglo de valores con la información de los registros
  * @param {Array} grafEtiq - Arreglo de strings con las etiquetas de los registros

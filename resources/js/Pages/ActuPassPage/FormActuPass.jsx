@@ -39,16 +39,16 @@ export default function FormActuContra({ infoSes, procResp }){
 
     // useEffect para monitorear los errores obtenidos en la validación, asi como, el resultado satisfactorio
     useEffect(() => {
-        if(procResp){
-            // Mostrar el modal de aviso satisfactorio para solicitud de actualización de contraseña realizada y redirigir al login pasados 2.5 segundos
+        // Si se trae mensaje de consulta concluida con exito se mostrará el modal de aviso satisfactorio y se redirigirá al login pasados 2.5 segundos
+        if(procResp)
             if(procResp.includes("La contraseña de")) {
                 setModalTitu("Contraseña Actualizada");
                 setModalConte(<Dialog textMsg={procResp}/>);
                 setModalOpen(true);
                 setTimeout(() => ( router.get('/', {}, { replace: true }) ), 2500);
             }
-        }
 
+        // En caso de traer errores de proceso o validación mostrar el modal de errores con su respectivo error
         if (errors.nueValContra || errors.confNueValContra) {
             setModalTitu("Error");
             setModalConte(<Dialog textMsg={`${errors.nueValContra || ""}\n${errors.confNueValContra || ""}`}/>);
@@ -85,7 +85,7 @@ export default function FormActuContra({ infoSes, procResp }){
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
 
-    // Funcion para la obtención de la respuesta de confirmación para la cancelación y gestión del proceso en base a dicha respuesta
+    // Función para la obtención de la respuesta de confirmación para la cancelación y gestión del proceso en base a dicha respuesta
     const handleModalCancel = (valSelOpcCancel) => {
         // Evaluar, que decidio el usuario para saber si continuar con la cancelacion de recuperacion o no
         if(valSelOpcCancel) {
@@ -115,7 +115,7 @@ export default function FormActuContra({ infoSes, procResp }){
         }
     }
 
-    /** Funcion para validación y envio del formulario de actualización de contraseña
+    /** Función para validación y envio del formulario de actualización de contraseña
      * @param {React.FormEventHandler<HTMLFormElement>} event - Evento de escucha para el envio del formulario */
     function submitActuContra(event){
         event.preventDefault();

@@ -8,7 +8,7 @@ import Dialog from '../Modal/Plantillas/Dialog';
 
 /** Función que regresa como componente el calendario para la selección del rango de fechas utilizado en la busqueda de datos
  * @param {Object} props - Objeto con las propiedades a recibir desde el componente padre
- * @param {function(Array): void} props.setFecha - Funcion para establecer el arreglo de valores con la selección de fechas
+ * @param {function(Array): void} props.setFecha - Función para establecer el arreglo de valores con la selección de fechas
  * @returns {JSX.Element} Componente JSX con el calendario Flatpickr en modo rango para la selección de fechas */
 export default function CalenGrafica({ setFecha }){
     /* Variables de estado para el modal: titulo, contenido del modal, apertura y cierre */

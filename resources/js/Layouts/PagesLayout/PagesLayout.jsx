@@ -5,7 +5,7 @@ import Pie_Pagina from "../../Components/UI/Pie/Pie_Gen";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 
-/** Funcion para establecer el layout compartido de las paginas
+/** Función para establecer el layout compartido de las paginas
  * @param {React.ReactNode} children - Nodo de react con el contenido a mostrar en la pagina
  * @returns {JSX.Element} - Componente JSX con el contenido de la pagina */
 export default function PagesLayout({ children }){
@@ -67,8 +67,8 @@ export default function PagesLayout({ children }){
             setModalTitu("Cerrar Sesión");
             setModalConte(<Dialog textMsg="El tiempo de su sesión venció, favor de acceder nuevamente." />);
             setModalOpen(true);
-            // Redireccionamiento hacia el login despues de 2 segundos
-            setTimeout( () => ( router.get('/', {}, { replace: true }) ), 2000);
+            // Redireccionamiento hacia el login despues de 2.5 segundos
+            setTimeout( () => ( router.get('/', {}, { replace: true }) ), 2500);
         }, 600000);
     };
 

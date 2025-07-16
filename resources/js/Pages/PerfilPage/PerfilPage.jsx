@@ -12,7 +12,7 @@ function PerfilPage({ infoUser }){
     return(
         <section className="w-full md:h-[82dvh] flex flex-col items-center justify-center bg-slate-400 p-5">
             <section className="max-w-screen lg:p-7 p-6 w-full lg:max-w-full lg:flex self-center justify-center">
-                <section className="h-full w-full lg:h-auto lg:w-48 flex-none bg-cover lg:rounded-l text-center overflow-hidden border border-gray-400">
+                <section className="w-full h-full lg:w-50 lg:h-auto flex-none bg-cover lg:rounded-l text-center overflow-hidden border border-gray-400">
                     <img src="/images/Imagen_Usuario.jpg" alt="Imagen de perfil" width={600} height={600} style={{objectFit: 'contain'}}/>
                 </section>
                 <section className="border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">

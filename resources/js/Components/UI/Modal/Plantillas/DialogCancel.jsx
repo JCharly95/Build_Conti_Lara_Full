@@ -1,4 +1,4 @@
-/** Funcion para crear los modales de proceso; los que requieran de una respuesta de usuario para confirmar o cancelar el proceso.
+/** Función para crear los modales de proceso; los que requieran de una respuesta de usuario para confirmar o cancelar el proceso.
  * @param {object} props - Objeto con las propiedades del componente
  * @param {string} props.textMsg - Cadena de texto con el mensaje a mostrar
  * @param {string} props.textSoli - Cadena de texto con el mensaje a mostrar en los botones
@@ -19,8 +19,7 @@ export default function DialogCancelar({ textMsg, textSoli, opcSel }){
         <section>
             <section className="flex flex-col items-center text-justify text-black mb-2">
                 {
-                    (arrTexto.length > 0) ? 
-                        arrTexto.map((oracion, idx) => (<span key={idx}>{ oracion }<br /></span>))
+                    (arrTexto.length > 0) ? arrTexto.map((oracion, idx) => (<span key={idx}>{ oracion }<br /></span>))
                     : <span>{ textMsg }</span>
                 }
             </section>

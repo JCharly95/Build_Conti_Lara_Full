@@ -91,71 +91,75 @@ class LinkRecuController extends Controller
         if($validador->fails())
             return back()->withErrors($validador);
 
-        // Buscar y obtener el usuario en la BD
-        $infoUser = User::where([
-            ['Cod_User', '=', $consulta->codUser],
-            ['Nombre', '=', $consulta->nomUser],
-            ['Ape_Pat', '=', $consulta->apePatUser],
-            ['Ape_Mat', '=', $consulta->apeMatUser],
-            ['Correo', '=', $consulta->dirCorUser]
-        ])->select(['Cod_User', 'Correo'])->first();
-
-        // Si no se encontró información del usuario se regresará a la interfaz de recuperación
-        if(!$infoUser)
-            return back()->withErrors(['codUser' => 'Error: El usuario solicitado no existe.']);
-
         try {
-            // Antes de crear un nuevo link de recuperación, se consultará si no se cuenta con otro sin resolver
-            $busLinkRecu = Link_Recu::where('Ruta_Sistema', '=', $consulta->codUser."/".$consulta->nomUser)->value('Link_Correo');
-
-            // Regresar un error si se encontró un enlace de recuperación previo
-            if($busLinkRecu)
-                return back()->withErrors(['dirCorUser' => 'Error: El usuario cuenta con una solicitud de renovación pendiente.']);
-
-            // Crear el objeto helper y usar el metodo de generación de links aleatorios
-            $linkRecuGen = app(GenLinksHelper::class)->generadorLinks();
+            // Buscar y obtener el usuario en la BD
+            $infoUser = User::where([
+                ['Cod_User', '=', $consulta->codUser],
+                ['Nombre', '=', $consulta->nomUser],
+                ['Ape_Pat', '=', $consulta->apePatUser],
+                ['Ape_Mat', '=', $consulta->apeMatUser],
+                ['Correo', '=', $consulta->dirCorUser]
+            ])->select(['Cod_User', 'Correo'])->first();
     
-            // Proteger la consulta de la creación del link aleatorio
+            // Si no se encontró información del usuario se regresará a la interfaz de recuperación
+            if(!$infoUser)
+                return back()->withErrors(['codUser' => 'Error: El usuario solicitado no existe.']);
+
             try {
-                // Guardar el link aleatorio en la base de datos asi como la ruta del sistema a la que apuntara el enrutamiento dinamico
-                $guardaLink = Link_Recu::create([
-                    'Link_Correo' => $linkRecuGen,
-                    'Ruta_Sistema' => $consulta->codUser."/".$consulta->nomUser
-                ]);
+                // Antes de crear un nuevo link de recuperación, se consultará si no se cuenta con otro sin resolver
+                $busLinkRecu = Link_Recu::where('Ruta_Sistema', '=', $consulta->codUser."/".$consulta->nomUser)->value('Link_Correo');
+
+                // Regresar un error si se encontró un enlace de recuperación previo
+                if($busLinkRecu)
+                    return back()->withErrors(['dirCorUser' => 'Error: El usuario cuenta con una solicitud de renovación pendiente.']);
+
+                // Crear el objeto helper y usar el metodo de generación de links aleatorios
+                $linkRecuGen = app(GenLinksHelper::class)->generadorLinks();
         
-                // Regresar un error si no se pudo registrar el link de recuperación
-                if(!$guardaLink)
-                    return back()->withErrors(['dirCorUser' => 'Error: Proceso de recuperación interrumpido. Favor de intentar nuevamente.']);
-    
-                // Proteger la consulta del envio del correo
+                // Proteger la consulta de la creación del link aleatorio
                 try {
-                    // Obtener la url de la aplicacion y el puerto de acceso
-                    $urlApp = config("app.url");
-                    $urlPort = config("app.port");
-                    
-                    // Enviar el correo de recuperación.
-                    $enviarCorreo = Mail::to($consulta->dirCorUser)->send(new RecuperacionEmail([
-                        'nombre' => $consulta->nomUser,
-                        'apePat' => $consulta->apePatUser,
-                        'apeMat' => $consulta->apeMatUser,
-                        'dirEnvio' => $consulta->dirCorUser,
-                        'linkRecuCor' => $urlApp.':'.$urlPort.'/actuAcc/'.$linkRecuGen
-                    ]));
-                    
-                    // Revisar que el envio de correo se haya realizado
-                    if(is_null($enviarCorreo))
-                        return back()->withErrors(['dirCorUser' => 'Error: El correo de recuperación no pudo ser enviado.']);
-                    
-                    // Regresar la información encontrada en la BD
-                    return back()->with('results', 'Correo de recuperación enviado. Favor de revisar su correo electronico para continuar con la renovación.');
+                    // Guardar el link aleatorio en la base de datos asi como la ruta del sistema a la que apuntara el enrutamiento dinamico
+                    $guardaLink = Link_Recu::create([
+                        'Link_Correo' => $linkRecuGen,
+                        'Ruta_Sistema' => $consulta->codUser."/".$consulta->nomUser
+                    ]);
+            
+                    // Regresar un error si no se pudo registrar el link de recuperación
+                    if(!$guardaLink)
+                        return back()->withErrors(['dirCorUser' => 'Error: Proceso de recuperación interrumpido. Favor de intentar nuevamente.']);
+        
+                    // Proteger la consulta del envio del correo
+                    try {
+                        // Obtener la url de la aplicacion y el puerto de acceso
+                        $urlApp = config("app.url");
+                        $urlPort = config("app.port");
+                        
+                        // Enviar el correo de recuperación.
+                        $enviarCorreo = Mail::to($consulta->dirCorUser)->send(new RecuperacionEmail([
+                            'nombre' => $consulta->nomUser,
+                            'apePat' => $consulta->apePatUser,
+                            'apeMat' => $consulta->apeMatUser,
+                            'dirEnvio' => $consulta->dirCorUser,
+                            'linkRecuCor' => $urlApp.':'.$urlPort.'/actuAcc/'.$linkRecuGen
+                        ]));
+                        
+                        // Revisar que el envio de correo se haya realizado
+                        if(is_null($enviarCorreo))
+                            return back()->withErrors(['dirCorUser' => 'Error: El correo de recuperación no pudo ser enviado.']);
+                        
+                        // Regresar la información encontrada en la BD
+                        return back()->with('results', 'Correo de recuperación enviado. Favor de revisar su correo electronico para continuar con la renovación.');
+                    } catch(Throwable $exception4) {
+                        return back()->withErrors(['dirCorUser' => 'Error: El correo de recuperación no fue enviado. Causa: '.$exception4->getMessage()]);
+                    }
                 } catch(Throwable $exception3) {
-                    return back()->withErrors(['dirCorUser' => 'Error: El correo de recuperación no fue enviado. Causa: '.$exception3->getMessage()]);
+                    return back()->withErrors(['dirCorUser' => 'Error: El enlace de recuperación no fue generado. Causa: '.$exception3->getMessage()]);
                 }
             } catch(Throwable $exception2) {
-                return back()->withErrors(['dirCorUser' => 'Error: El enlace de recuperación no fue generado. Causa: '.$exception2->getMessage()]);
+                return back()->withErrors(['dirCorUser' => 'Error: Su solicitud tuvo que ser interrumpida. Causa: '.$exception2->getMessage()]);
             }
         } catch(Throwable $exception1) {
-            return back()->withErrors(['dirCorUser' => 'Error: Su solicitud tuvo que ser interrumpida. Causa: '.$exception1->getMessage()]);
+            return back()->withErrors(['codUser' => 'Error: El no se encontró información del usuario solicitado. Causa: '.$exception1->getMessage()]);
         }
     }
 
