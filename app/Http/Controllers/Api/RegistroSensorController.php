@@ -107,12 +107,12 @@ class RegistroSensorController extends Controller
 
                     // Regresar un error si no se encontraron registros
                     if ($infoRes->isEmpty())
-                        return response()->json(['msgError' => 'Error: No se encontraron los registros.'], 404);
+                        return response()->json(['msgError' => 'Error: No se encontró información con respecto a los datos de busqueda seleccionados.'], 404);
     
                     // Regresar los registros obtenidos
                     return response()->json(['results' => $infoRes], 200);
                 } catch(Throwable $exception2) {
-                    return response()->json(['msgError' => 'Error: No se regresaron los registros. Causa: '.$exception2->getMessage()], 500);
+                    return response()->json(['msgError' => 'Error: No se pudó obtener información relacionada a la busqueda establecida. Causa: '.$exception2->getMessage()], 500);
                 }
             }
             

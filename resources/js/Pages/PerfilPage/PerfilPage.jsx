@@ -15,11 +15,11 @@ function PerfilPage({ infoUser }){
                 <section className="w-full h-full lg:w-50 lg:h-auto flex-none bg-cover lg:rounded-l text-center overflow-hidden border border-gray-400">
                     <img src="/images/Imagen_Usuario.jpg" alt="Imagen de perfil" width={600} height={600} style={{objectFit: 'contain'}}/>
                 </section>
-                <section className="border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">
+                <section className="border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-r px-4 py-2 flex flex-col justify-between leading-normal">
                     <section className="lg:mt-6 mt-0 lg:mb-0 mb-8">
                         <p className="text-sm text-gray-600 flex items-center">
                             <User size={25} className="mr-2"/>
-                            ¿Que desea hacer hoy? {infoUser['nomUserSes']}
+                            ¿Qué desea hacer hoy {infoUser['nomUserSes']}?
                         </p>
                         <section className="text-gray-900 font-bold text-xl my-2 inline-flex">
                             <Calendar size={25} className="mr-2"/> La fecha actual es: { getFecha() } hrs.

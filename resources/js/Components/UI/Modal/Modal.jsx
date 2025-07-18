@@ -43,7 +43,7 @@ export default function Modal({ titModal, conteModal, isOpen }){
             icono = (<AlertOctagon color="red" size={25} className="mr-2"/>);
             break;
         case "Aviso de Cancelación":
-            icono = (<AlertTriangle color="green" size={25} className="mr-2"/>);
+            icono = (<AlertTriangle color="red" size={25} className="mr-2"/>);
             break;
         case "Agregar Sensor":
             icono = (<FilePlus color="black" size={25} className="mr-2"/>);

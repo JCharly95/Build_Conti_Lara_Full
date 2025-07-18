@@ -59,7 +59,7 @@ class UsuarioController extends Controller
 
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
-            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['Nombre', 'Correo', 'UltimoAcceso'])->first();
+            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['Correo'])->first();
 
             // Regresar un error en caso de no encontrar al usuario
             if(!$usuario)
@@ -106,7 +106,7 @@ class UsuarioController extends Controller
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
             // NOTA Futura: Si se obtendrá algun modelo de la BD y posteriormente se modificará alguno de sus campos, se deberá omitir el select si no se requiere extraer valores especificos. Pero si es el caso, se deberá incluir el campo de id de la tabla para que Eloquent identifique el registro donde actualizará el valor en cuestión por medio de su id.
-            $usuario = User::where('Correo', '=', $valDirCor)->select(['ID_User', 'UltimoAcceso'])->first();
+            $usuario = User::where('Correo', '=', $valDirCor)->select(['ID_User', 'Nombre', 'UltimoAcceso'])->first();
 
             // Regresar un error en caso de no encontrar al usuario
             if(!$usuario)

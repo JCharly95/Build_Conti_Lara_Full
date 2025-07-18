@@ -38,7 +38,7 @@ export default function MenuSelRegi({ resSenNoRegSel }){
     const handleChange = () => ( valRegreso(listaSenNRegiRef.current.value) );
 
     return(
-        <select id="menuSelSenNoRegi" name="menuSelSenNoRegi" className="block w-full h-full bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 lg:text-base pl-1 py-2 cursor-pointer" onChange={handleChange} ref={listaSenNRegiRef}>
+        <select id="menuSelSenNoRegi" name="menuSelSenNoRegi" className="block w-full h-full bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 lg:text-base pl-1 py-2 cursor-pointer" onChange={handleChange} onBlur={handleChange} ref={listaSenNRegiRef}>
             <option key="SenNoRegi0" value="Seleccione el sensor a registrar...">Seleccione el sensor a registrar...</option>
             { (arrSenNoRegi.length > 0 ) ? (arrSenNoRegi.map( (sensor) => (
                     <option key={`SenNoRegi${sensor.ID}`} value={sensor.ID_Niag}>
