@@ -36,7 +36,7 @@ export default function MenuSelGraf({ resSenSel }){
             <option key="SenRegi0" value="Seleccione el sensor a buscar...">Seleccione el sensor a buscar...</option>
             { (arrSenRegi.length > 0 ) ? ( arrSenRegi.map(
                 (sensor) => (
-                    <option key={`SenRegi${sensor.id}`} value={`${sensor.valor};${sensor.nombre};${sensor.unidad}`}>
+                    <option key={`SenRegi${sensor.id}`} value={`${sensor.identiNiag};${sensor.nombre};${sensor.unidad}`}>
                         {`${sensor.nombre} (${sensor.unidad})`}
                     </option>
                 )
@@ -72,7 +72,7 @@ function ordenarDatos(arrInfo){
     let arrOrdeInfo = arrInfo.map((sensor) => {
         // Obtener la cadena de texto con la unidad del registro y establecer el objeto del registro a regresar
         let uniRegi = `${sensor.VALUEFACETS}`.split(";")[1],
-        objRegi = { id: sensor.ID_Sensor, nombre: `${sensor.Nombre}`, valor: `${sensor.ID_}`, unidad: "" };
+        objRegi = { id: sensor.ID_Sensor, nombre: `${sensor.Nombre}`, identiNiag: `${sensor.ID_}`, unidad: "" };
 
         // Determinar la unidad del registro
         switch(uniRegi) {

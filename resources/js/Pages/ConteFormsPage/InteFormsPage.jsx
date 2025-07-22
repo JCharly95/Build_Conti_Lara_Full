@@ -3,7 +3,7 @@ import { router } from "@inertiajs/react";
 import PagesLayout from "../../Layouts/PagesLayout/PagesLayout";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
-import FormRegiSensor from "../../Components/UI/Forms/Internos/RegiSensor/FormRegiSen";
+import FormRegistroSensor from "../../Components/UI/Forms/Internos/RegiSensor/FormRegiSen";
 
 /** Función para renderizar la pagina contenedora de los formularios internos del sistema
  * @param {object} props - Objeto con las propiedades ingresadas para la visualización de la pagina
@@ -37,7 +37,7 @@ function ContenedorFormulariosPage({ nomFormVer, msgConclu }){
 
     return(
         <section>
-            {nomFormVer === 'Registro_Sensor' && <FormRegiSensor />}
+            {nomFormVer === 'Registro_Sensor' && <FormRegistroSensor />}
             {modalOpen && <Modal isOpen={handleModal} titModal={modalTitu} conteModal={modalConte}/>}
         </section>
     );
