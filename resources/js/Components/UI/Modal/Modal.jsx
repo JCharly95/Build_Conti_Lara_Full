@@ -76,7 +76,7 @@ export default function Modal({ titModal, conteModal, isOpen }){
                             </svg>
                         </button>
                     </section>
-                    <section className="p-4 overflow-y-auto inline-flex">
+                    <section className="p-4 overflow-y-auto inline-flex justify-center">
                         { (titModal == "Cargando") ? modalCarga : conteModal }
                     </section>
                 </section>

@@ -36,7 +36,7 @@ export default function FormRegistroSensor(){
         // Lanzar el modal de error en la selección del sensor si el la cadena de texto resultante contiene: parte de la cadena selección por defecto o la palabra "error" que significa falta de selección de valor o un error de procesamiento.
         if(idSenNiag.includes("Seleccione") || idSenNiag.includes("Error")) {
             setModalTitu("Error");
-            setModalConte(<Dialog textMsg={idSenNiag}/>);
+            setModalConte(<Dialog textMsg={(idSenNiag.includes("Seleccione")) ? "Error: No hubo selección de sensor, favor de seleccionar uno." : idSenNiag}/>);
             setModalOpen(true);
         } else {
             // Establecer el valor del campo "idNiagSensor" del formulario en el hook del form

@@ -4,6 +4,7 @@ import PagesLayout from "../../Layouts/PagesLayout/PagesLayout";
 import Modal from "../../Components/UI/Modal/Modal";
 import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import FormRegistroSensor from "../../Components/UI/Forms/Internos/RegiSensor/FormRegiSen";
+import FormEditarSensor from "../../Components/UI/Forms/Internos/EditSensor/FormEditSen";
 
 /** Función para renderizar la pagina contenedora de los formularios internos del sistema
  * @param {object} props - Objeto con las propiedades ingresadas para la visualización de la pagina
@@ -38,6 +39,7 @@ function ContenedorFormulariosPage({ nomFormVer, msgConclu }){
     return(
         <section>
             {nomFormVer === 'Registro_Sensor' && <FormRegistroSensor />}
+            {nomFormVer === 'Edicion_Sensor' && <FormEditarSensor />}
             {modalOpen && <Modal isOpen={handleModal} titModal={modalTitu} conteModal={modalConte}/>}
         </section>
     );

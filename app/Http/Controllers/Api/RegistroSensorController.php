@@ -27,7 +27,7 @@ class RegistroSensorController extends Controller
         $registros = null;
 
         // Determinar si se solicito una consulta "completa" de registro o una limitada
-        if ($consulta->tipoConsul == 0) {
+        if ($consulta->tipoConsul === 0) {
             // Proteger la consulta en caso de que el servidor no la pudiera procesar
             try {
                 // Crear el arreglo de registros

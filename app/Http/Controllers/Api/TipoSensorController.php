@@ -36,12 +36,12 @@ class TipoSensorController extends Controller
         // NOTA: La consulta cruda seria: SELECT ID, ID_ FROM history_type_map WHERE ID NOT IN(SELECT Tipo_ID FROM sensor); Y en el caso de laravel; pluck seria el reemplazo de la consulta dentro del parentesis
         try {
             // Obtener todos los valores correspondientes a una clave, o en este caso, al nombre de una columna y transformarlo a un arreglo de datos
-            $listTipoID = Sensor::pluck('Tipo_ID')->toArray();
+            $listTipoID = Sensor::pluck('Tipo_ID');
 
-            // Regresar un error si no se obtuvieron valores solicitando las ids foraneas de la tabla sensores con respecto 
+            // Regresar un error si no se obtuvieron valores solicitando las ids foraneas de la tabla sensores
             if($listTipoID->isEmpty())
-                return response()->json(['msgError' => 'Error: Obtención de los sensores no registrados interrumpida. Favor de intentar nuevamente'], 404);
-            // Proteger la consulta unión para obtener los sensores que no esten nombrados (registrados)
+                return response()->json(['msgError' => 'Error: Obtención de los sensores no registrados interrumpida. Favor de intentar nuevamente.'], 404);
+            // Proteger la consulta para obtener los sensores que no esten nombrados (registrados)
             try {
                 // Obtener los tipos de sensores cuyo identificador no se encuentre registrado (ligado) en la tabla de sensores utilizada para nombrar los sensores, con proceso de evaluación de datos para evitar la ejecución de la busqueda si el arreglo de claves foraneas esta vacio. NOTA: use(...) se usa para pasar valores a funciones que se ejecuten de forma anexa al contexto (scope) (algo asi como las funciones asincronas, que tienen su espacio aparte) y requieran de valores para su operación
                 $listaSensores = Tipo_Sensor::when(!empty($listTipoID), function ($consulta) use ($listTipoID){
@@ -60,12 +60,5 @@ class TipoSensorController extends Controller
         } catch(Throwable $exception1) {
             return response()->json(['msgError' => 'Error: No se pudieron descartar los sensores registrados en la busqueda de los sensores sin registrar. Causa: '.$exception1->getMessage()], 500);
         }
-    }
-
-
-    public function listaSenSelecSenNoRegi(){
-        /* Por si acaso: esta seria la consulta que se tiene pensado implementar para mostrar el identificador del sensor actual junto con los sensores disponibles para la selección:
-        SELECT ID, ID_ FROM history_type_map WHERE ID NOT IN(SELECT Tipo_ID FROM sensor) UNION SELECT ID, ID_ FROM history_type_map WHERE ID_ = 'Identi_Niag_Sensor_Seleccionado_Lista' ORDER BY ID;
-        */
     }
 }

@@ -120,7 +120,11 @@ class UsuarioController extends Controller
                 $usuario->UltimoAcceso = $fechaAcceso;
                 
                 // Actualizar el valor
-                $usuario->save();
+                $resActuUltiAcc = $usuario->save();
+
+                // Regresar un error si el metodo de actualización regreso un "error", puesto que regresa un bool como resultado
+                if(!$resActuUltiAcc)
+                    return response()->json(['msgError' => 'Error: La fecha de acceso no fue actualizada.'], 500);
 
                 // Establecer los valores de la sesion con la información del usuario para mostrar en el perfil
                 session(['nomUserSes' => $usuario->Nombre]);
@@ -187,7 +191,11 @@ class UsuarioController extends Controller
                     $usuario->Contra = Hash::make($consulta->nueValContra);
 
                 // Actualizar el valor de la contraseña en la BD
-                $usuario->save();
+                $resActuPass = $usuario->save();
+
+                // Regresar un error si no se pudo actualizar la contraseña
+                if(!$resActuPass)
+                    return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo actualizar su contraseña. Favor de intentar nuevamente desde su correo.']);
 
                 // Una vez actualizado el valor de la contraseña satisfactoriamente, se procederá con el borrado del link para caducarlo
                 try {

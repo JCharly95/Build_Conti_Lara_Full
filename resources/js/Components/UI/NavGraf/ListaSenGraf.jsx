@@ -4,8 +4,9 @@ import axios from "axios";
 /** Función que regresa como componente la lista desplegable que contiene los sensores nombrados en el sistema para seleccionar el que se usará en la busqueda de datos para la grafica
  * @param {Object} props - Objeto con las propiedades a recibir desde el componente padre
  * @param {function(string): void} props.resSenSel - Función para establecer el sensor de busqueda que tiene un parametro string
+ * @param {string} props.oriRender - Cadena de texto para establecer desde donde se espera renderizar
  * @returns {JSX.Element} Componente JSX con la lista desplegable de sensores registrados */
-export default function MenuSelGraf({ resSenSel }){
+export default function MenuSelGraf({ resSenSel, oriRender }){
     // Variable de estado para guardar el arreglo que contiene los sensores registrados del sistema
     const [arrSenRegi, setArrSenRegi] = useState([]);
     /** Referencia hacia la lista de selección para obtener la información de los elementos que la conforman */
@@ -32,7 +33,7 @@ export default function MenuSelGraf({ resSenSel }){
     const handleChange = () => ( valRegreso(listaSenRef.current.value) );
 
     return (
-        <select id="menuSelSensor" name="menuSelSensor" className="block w-full h-5/6 bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm/6 pl-1 cursor-pointer" onChange={handleChange} onBlur={handleChange} ref={listaSenRef}>
+        <select id="menuSelSensor" name="menuSelSensor" className={(oriRender === "selGraf") ? "block w-full h-full py-1 pl-1 bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs text-center cursor-pointer lg:py-0 lg:text-left" : "block w-full h-full bg-neutral-300 rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs lg:text-base pl-1 py-2 cursor-pointer"} onChange={handleChange} onBlur={handleChange} ref={listaSenRef}>
             <option key="SenRegi0" value="Seleccione el sensor a buscar...">Seleccione el sensor a buscar...</option>
             { (arrSenRegi.length > 0 ) ? ( arrSenRegi.map(
                 (sensor) => (

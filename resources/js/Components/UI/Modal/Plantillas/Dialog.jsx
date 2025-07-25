@@ -14,10 +14,10 @@ export default function Dialog({ textMsg }){
     arrTexto = arrTexto.filter((valor) => (valor !== '' && valor !== ' '));
 
     return(
-        <section className="text-black">
+        <section className="text-black text-center">
             {
                 (arrTexto.length > 0) ? arrTexto.map((oracion, idx) => (<span key={idx}>{ oracion }<br /></span>))
-                : <span>{ textMsg }</span>
+                : (<span>{ textMsg }</span>)
             }
         </section>
     );

@@ -107,29 +107,28 @@ export default function NavBarGrafica({ infoBus }){
 
     return(
         <section className="w-full h-full bg-gray-800">
-            <section className="flex items-center justify-between flex-wrap w-full h-full bg-gray-800 px-4 py-1">
-                <section className="flex items-center justify-between shrink-0 text-white mr-2 pb-0.5">
-                    <span>Filtro Busqueda:</span>
+            <section className="w-full h-full flex items-center justify-between flex-wrap bg-gray-800 p-4">
+                <section className="flex items-center justify-between shrink-0 text-white mr-2 lg:pb-0.5 pb-0">
+                    <span>Busqueda:</span>
                 </section>
                 <section className="block lg:hidden">
                     <button type="button" className="flex items-center px-3 py-2 border rounded text-teal-200 border-teal-400 hover:text-white hover:border-white hover:bg-teal-600 cursor-pointer" onClick={handleBarra}>
                         <svg className="fill-current h-3 w-3" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><title>Filtro</title><path d="M3.9 54.9C10.5 40.9 24.5 32 40 32l432 0c15.5 0 29.5 8.9 36.1 22.9s4.6 30.5-5.2 42.5L320 320.9 320 448c0 12.1-6.8 23.2-17.7 28.6s-23.8 4.3-33.5-3l-64-48c-8.1-6-12.8-15.5-12.8-25.6l0-79.1L9 97.3C-.7 85.4-2.8 68.8 3.9 54.9z"/></svg>
                     </button>
                 </section>
-                <section className={`w-full grow lg:flex lg:items-center lg:w-auto ${verBarra ? 'block pb-2 lg:pb-0' : 'hidden'}`}>
-                    <section className="lg:grow lg:inline-flex lg:gap-1 align-middle">
-                        <section className="block mt-4 lg:inline-block lg:mt-1">
-                            <MenuSelGraf resSenSel={obteSensoSel}/>
+                <section className={`w-full grow mt-1 transition-all duration-500 ease-in-out overflow-hidden lg:max-h-full lg:opacity-100 lg:flex lg:items-center lg:w-auto lg:mt-0 ${(verBarra) ? 'max-h-96  opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <section className="w-full lg:w-1/2 lg:grow lg:inline-flex lg:gap-1">
+                        <section className="block lg:mt-0 mt-2 lg:inline-block">
+                            <MenuSelGraf resSenSel={obteSensoSel} oriRender="selGraf"/>
                         </section>
-                        <section className="block mt-4 lg:inline-block lg:mt-1">
+                        <section className="inline-flex w-full mt-2 gap-3 lg:mt-0 lg:w-auto lg:gap-0">
                             <CalenGrafica setFecha={obteFechasSel}/>
+                            <button type="button" onClick={valiSelNavBus} disabled={btnBusInfo} className={`text-white font-bold ml-1 py-0.5 px-2 rounded block lg:inline-block lg:mt-0 ${(btnBusInfo) ? "bg-gray-500 hover:bg-gray-700 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700 cursor-pointer"}`}>Buscar</button>
                         </section>
-                        <section className="block mt-4 lg:inline-block lg:mt-1">
-                            <button type="button" onClick={valiSelNavBus} disabled={btnBusInfo} className={`text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 ${(btnBusInfo) ? "bg-gray-500 hover:bg-gray-700 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700 cursor-pointer"}`}>Buscar</button>
-                        </section>
-                        <section className="block mt-4 lg:mb-0 lg:ml-6 lg:inline-block lg:mt-1">
-                            <button type="button" className="bg-green-500 hover:bg-green-800 text-white font-bold py-0.5 px-2 rounded block lg:inline-block lg:mt-0 cursor-pointer" onClick={() => (router.get('/formInter', { formuSoli: "Registro_Sensor" }, { replace: true }))}>Agregar Sensor</button>
-                        </section>
+                    </section>
+                    <section className="w-full mt-2 inline-flex justify-center gap-7 lg:w-1/2 lg:grow lg:justify-end lg:mb-0 lg:mt-0 lg:gap-3">
+                        <button type="button" className="block py-0.5 px-2 lg:inline-block lg:mt-0 bg-green-500 hover:bg-green-800 text-white font-bold rounded cursor-pointer" onClick={() => (router.get('/formInter', { formuSoli: "Registro_Sensor" }, { replace: true }))}>Agregar Sensor</button>
+                        <button type="button" className="block py-0.5 px-2 lg:inline-block lg:mt-0 bg-yellow-500 hover:bg-yellow-800 text-white font-bold rounded cursor-pointer" onClick={() => (router.get('/formInter', { formuSoli: "Edicion_Sensor" }, { replace: true }))}>Editar/Eliminar Sensor</button>
                     </section>
                 </section>
             </section>

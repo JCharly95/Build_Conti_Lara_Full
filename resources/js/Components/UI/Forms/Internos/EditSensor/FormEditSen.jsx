@@ -1,21 +1,27 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, router } from "@inertiajs/react";
 import Modal from "../../../Modal/Modal";
 import Dialog from "../../../Modal/Plantillas/Dialog";
 import MenuSelGraf from "../../../NavGraf/ListaSenGraf";
-import { Edit } from "react-feather";
+import MenuSelRegi from "../RegiSensor/ListaSenRegi";
+import { Edit, Trash2 } from "react-feather";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEraser } from "@fortawesome/free-solid-svg-icons";
 
 /** Función para renderizar el formulario para la edición y eliminación de sensores nombrados
  * @returns {JSX.Element} Componente del formulario para edición y eliminación de sensores */
 export default function FormEditarSensor(){
     /* Variables de estado para el modal: apertura y cierre, titulo, contenido del modal
+    
     Hook para el formulario cortesia de inertia para poder controlar el estado de los campos del formulario */
     const [modalTitu, setModalTitu] = useState(""),
     [modalConte, setModalConte] = useState(<></>),
     [modalOpen, setModalOpen] = useState(false),
-    { data, setData, post, processing, errors, reset } = useForm({
-        nomSensor: '',
-        idNiagSensor: ''
+    [uniMediSenSel, setUniMediSenSel] = useState("Esperando selección"),
+    [habiEdici, setHabiEdici] = useState(false),
+    { data, setData, post, delete: destroy, processing, errors, reset } = useForm({
+        nomSensor: 'Esperando selección',
+        idNiagSensor: 'Esperando selección'
     });
 
     // useEffect para monitorear los sensores de la validación
@@ -30,13 +36,40 @@ export default function FormEditarSensor(){
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
 
+    // Habilitar/Deshabilitar la edición de campos
+    const handleEdit = () => ( setHabiEdici(!habiEdici) );
+
     /** Función para obtener la información del sensor registrado seleccionado o el error en la consulta de obtención de información
-     * @param {String} idSenNiag - Cadena de texto con la información del sensor seleccionado o el error obtenido */
-    const obteSenRegi = (idSenNiag) => {
+     * @param {String} infoSenSel - Cadena de texto con la información del sensor seleccionado o el error obtenido */
+    const obteSenRegi = (infoSenSel) => {
+        // Lanzar el modal de error en la selección del sensor si el la cadena de texto resultante contiene: parte de la cadena selección por defecto, la palabra "error" que significa un error de procesamiento o si no contiene ";" que significa el caracter de concatenación para la información del sensor seleccionado.
+        if(infoSenSel.includes("Seleccione") || infoSenSel.includes("Error") || !infoSenSel.includes(";")) {
+            setModalTitu("Error");
+
+            if(infoSenSel.includes("Seleccione") || !infoSenSel.includes(";"))
+                setModalConte(<Dialog textMsg="Error: El sensor seleccionado no es valido, favor de intentar nuevamente."/>);
+
+            if(infoSenSel.includes("Error"))
+                setModalConte(<Dialog textMsg={infoSenSel}/>);
+
+            setModalOpen(true);
+        }
+
+        // Establecer la información en los campos de texto, si la edición no esta habilitada y si la cadena de texto contiene el separador ; para desglozar la información
+        if(!habiEdici) {
+            setData('nomSensor', (infoSenSel.includes(";")) ? infoSenSel.split(";")[1] : 'Esperando selección');
+            setData('idNiagSensor', (infoSenSel.includes(";")) ? infoSenSel.split(";")[0] : 'Esperando selección');
+            setUniMediSenSel((infoSenSel.includes(";")) ? infoSenSel.split(";")[2] : 'Esperando selección');
+        }
+    }
+
+    /** Función para obtener la información del sensor no registrado seleccionado o el error en la consulta de obtención de información
+     * @param {String} idSenNiag - Cadena de texto con el identificador niagara del sensor seleccionado o el error obtenido */
+    const obteSenNRegi = (idSenNiag) => {
         // Lanzar el modal de error en la selección del sensor si el la cadena de texto resultante contiene: parte de la cadena selección por defecto o la palabra "error" que significa falta de selección de valor o un error de procesamiento.
         if(idSenNiag.includes("Seleccione") || idSenNiag.includes("Error")) {
             setModalTitu("Error");
-            setModalConte(<Dialog textMsg={idSenNiag}/>);
+            setModalConte(<Dialog textMsg={(idSenNiag.includes("Seleccione")) ? "Error: Favor de seleccionar un sensor." : idSenNiag}/>);
             setModalOpen(true);
         } else {
             // Establecer el valor del campo "idNiagSensor" del formulario en el hook del form
@@ -46,19 +79,28 @@ export default function FormEditarSensor(){
 
     /** Función para validación y envio del formulario en el back
      * @param {React.FormEventHandler<HTMLFormElement>} event - Evento del formulario con la información de este */
-    function submitRegiSensoForm(event){
+    function submitEdiEliSensoForm(event){
         event.preventDefault();
-        // Enviar a la ruta de procesamiento en el back
-        post('/valiRegiSen');
+        // Obtener el apuntador hacia el boton que desencadeno el evento de envio y luego el nombre de este
+        let btnPresi = event.nativeEvent.submitter,
+        nomBtn = btnPresi.name;
+
+        // Determinar la acción a hacer dependiendo del nombre del boton que causo el envio
+        if(nomBtn === "EditarSensor"){
+            // Enviar a la ruta de procesamiento en el back
+            post('/valiRegiSen');
+        } else {
+            destroy('/valiRegiSen');
+        }
     }
     
     /** Función para cancelar el registro del sensor y redirigir a la pagina de la grafica */
-    function cancelRegiSoli(){
+    function cancelEdiEliSoli(){
         // Reestablecer el formulario y mostrar el modal de cancelación
         reset();
 
         setModalTitu("Aviso de Cancelación");
-        setModalConte(<Dialog textMsg="El registro del sensor fue cancelado."/>);
+        setModalConte(<Dialog textMsg="El proceso de edición o eliminación del sensor fue cancelado."/>);
         setModalOpen(true);
 
         // Redirigir hacia la grafica después de 2 segundos
@@ -71,44 +113,78 @@ export default function FormEditarSensor(){
                 <section className="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto">
                     <section className="flex justify-between items-center py-2 px-4 border-b-2">
                         <h3 className="font-bold text-gray-800 inline-flex items-center">
-                            <Edit color="black" size={25} className="mr-2"/> Editar Sensor
+                            <Edit color="black" size={25} className="mr-2"/> Editar o Eliminar Sensor
                         </h3>
+                        <button type="button" className="bg-[#375164] inline-flex items-center text-center text-white p-1 rounded cursor-pointer" title="Limpiar Campos" onClick={() => {
+                            reset();
+                            setUniMediSenSel('Esperando selección');
+                            setHabiEdici(false);
+                        }}><FontAwesomeIcon icon={faEraser} size="lg" /></button>
                     </section>
                     <section className="lg:p-4 p-2 overflow-y-auto inline-flex">
-                        <form onSubmit={submitRegiSensoForm} className="bg-white px-6">
+                        <form onSubmit={submitEdiEliSensoForm} className="bg-white px-6">
                             <section className="md:flex md:items-center mb-2">
                                 <section className="md:w-1/3">
-                                    <label htmlFor="nomSens" className="block text-gray-500 md:text-center mb-1 md:mb-0 pr-4">
-                                        Seleccione el sensor que desea editar:
+                                    <label htmlFor="sensorRegis" className="block text-gray-500 md:text-center mb-1 md:mb-0 pr-4">
+                                        Sensores del sistema:
                                     </label>
                                 </section>
                                 <section className="md:w-2/3">
-                                    <input id="nomSens" type="text" value={data.nomSensor} onChange={(ev) => setData('nomSensor', ev.target.value)} placeholder="Nombre del Sensor" autoComplete="on" className="shadow shadow-emerald-300 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+                                    <MenuSelGraf id="sensorRegis" resSenSel={obteSenRegi} oriRender="formEdit"/>
                                 </section>
                             </section>
                             <section className="md:flex md:items-center mb-2">
                                 <section className="md:w-1/3">
                                     <label htmlFor="nomSens" className="block text-gray-500 md:text-center mb-1 md:mb-0 pr-4">
-                                        Seleccione el sensor que desea editar:
+                                        Nombre:
                                     </label>
                                 </section>
                                 <section className="md:w-2/3">
-                                    <input id="nomSens" type="text" value={data.nomSensor} onChange={(ev) => setData('nomSensor', ev.target.value)} placeholder="Nombre del Sensor" autoComplete="on" className="shadow shadow-emerald-300 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+                                    <input id="nomSens" type="text" value={data.nomSensor} onChange={(ev) => setData('nomSensor', ev.target.value)} placeholder="Nombre del Sensor" disabled={!habiEdici} autoComplete="on" className={(!habiEdici) ? "shadow shadow-red-600 appearance-none border rounded w-full py-2 px-3 text-neutral-300 bg-gray-600 leading-tight focus:outline-none focus:shadow-outline" : "shadow shadow-emerald-300 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"}/>
                                 </section>
                             </section>
                             <section className="md:flex md:items-center mb-2">
                                 <section className="md:w-1/3">
                                     <label htmlFor="idSenNiag" className="block text-gray-500 md:text-center mb-1 md:mb-0 pr-4">
+                                        Identificador niagara:
+                                    </label>
+                                </section>
+                                <section className="md:w-2/3">
+                                    <input id="idSenNiag" type="text" value={data.idNiagSensor} onChange={(ev) => setData('idNiagSensor', ev.target.value)} disabled={true} placeholder="Identificador Niagara del Sensor" autoComplete="on" className="shadow shadow-emerald-300 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+                                </section>
+                            </section>
+                            <section className="md:flex md:items-center mb-2">
+                                <section className="md:w-1/3">
+                                    <label htmlFor="uniMediSen" className="block text-gray-500 md:text-center mb-1 md:mb-0 pr-4">
+                                        Unidad de medición:
+                                    </label>
+                                </section>
+                                <section className="md:w-2/3">
+                                    <span id="uniMediSen" className="block appearance-none w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline cursor-default">
+                                        {uniMediSenSel}
+                                    </span>
+                                </section>
+                            </section>
+                            <section className="flex items-center justify-center mb-2">
+                                <input id="chkHabiEdit" type="checkbox" checked={habiEdici} onChange={handleEdit} className="shadow shadow-emerald-300 border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+                                <label htmlFor="chkHabiEdit" className="ml-3 text-center">
+                                    { (habiEdici) ? "Deshabilitar edición" : "Habilitar edición" }
+                                </label>
+                            </section>
+                            <section className="md:flex md:items-center mb-2">
+                                <section className="md:w-1/3">
+                                    <label htmlFor="senEditChg" className="block text-gray-500 md:text-center mb-1 md:mb-0 pr-4">
                                         Sensores disponibles:
                                     </label>
                                 </section>
                                 <section className="md:w-2/3">
-                                    <MenuSelRegi id="idSenNiag" resSenNoRegSel={obteSenRegi} />
+                                    <MenuSelRegi id="idSenNiag" resSenNoRegSel={obteSenNRegi} />
                                 </section>
                             </section>
                             <section className="flex items-center justify-center pt-1">
-                                <button type="submit" disabled={processing} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer">Registrar Sensor</button>
-                                <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer" onClick={cancelRegiSoli}>Cancelar Registro</button>
+                                <button type="submit" name="EditarSensor" disabled={processing || !habiEdici} className={`text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 ${(!habiEdici) ? "bg-gray-500 hover:bg-gray-700 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700 cursor-pointer"}`}>Confirmar</button>
+                                <button type="submit" name="EliminarSensor" disabled={processing} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer">Eliminar</button>
+                                <button type="button" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-3 cursor-pointer" onClick={cancelEdiEliSoli}>Cancelar</button>
                             </section>
                         </form>
                     </section>

@@ -104,3 +104,6 @@ Route::get('/formInter', function(Request $consulta) {
 
 // Ruta para enviar a validar la información del formulario para el registro de un sensor con nombre "validarRegiSen" para el enrutamiento de laravel; y registrar el sensor si se cumplen con los criterios establecidos en el formulario
 Route::post('/valiRegiSen', [SensorController::class, "regiSensor"])->name("validarRegiSen");
+
+// Ruta para enviar a validar la información del formulario para la edición de un sensor "validarEditSen" para el enrutamiento de laravel; y actualizar la información del sensor si se cumplen con los criterios establecidos en el formulario
+Route::post('/valiEditSen', [SensorController::class, "editarSensor"])->name("validarEditSen");

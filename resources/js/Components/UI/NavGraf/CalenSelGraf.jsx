@@ -51,22 +51,22 @@ export default function CalenGrafica({ setFecha }){
     const estaReturn = (valor) => ( setFecha(valor) );
 
     return(
-        <section className="inline-flex ring-2 ring-inset ring-gray-400 rounded-md border-0 p-0.5 bg-neutral-300">
-            <label className="flex items-center justify-between text-black bg-blue-500 font-bold px-0.5 rounded-s border-0 cursor-pointer" htmlFor="CalenSelGraf">
+        <section className="w-full p-0.5 inline-flex ring-2 ring-inset ring-gray-400 rounded-md bg-neutral-300">
+            <label htmlFor="CalenSelGraf" className="flex items-center justify-between text-black bg-blue-500 font-bold px-0.5 rounded-s border-0 cursor-pointer">
                 <Calendar />
             </label>
-            <Flatpickr id="CalenSelGraf" placeholder="Fecha de Busqueda" options={optionsCalen} ref={calenRef} className="px-2"/>
-            <button type="button" className="bg-red-600 text-center text-white px-0.5 rounded-e cursor-pointer mr-1" onClick={() => {
+            <Flatpickr id="CalenSelGraf" placeholder="Fecha de Busqueda" options={optionsCalen} ref={calenRef} className="w-full px-2 text-center"/>
+            <button type="button" className="bg-red-600 mr-1 px-0.5 text-center text-white rounded-e cursor-pointer" onClick={() => {
                 if(!calenRef?.current?.flatpickr)
                     return;
                 calenRef.current.flatpickr.clear();
                 estaReturn([]);
             }}><Trash2 /></button>
-            <HelpCircle className="cursor-pointer bg-white rounded" onClick={() => {
+            <button type="button" className="bg-white px-0.5 rounded cursor-pointer" onClick={() => {
                 setModalTitu("Aviso");
                 setModalConte(<Dialog textMsg="NOTA: Los minutos y segundos seleccionados serán establecidos en ambas fechas."/>);
                 setModalOpen(true);
-            }}/>
+            }}><HelpCircle /></button>
             { modalOpen && <Modal titModal={modalTitu} conteModal={modalConte} isOpen={handleModal}/> }
         </section>
     );
