@@ -11,7 +11,7 @@ use Throwable;
 class TipoSensorController extends Controller
 {
     /** Metodo para regresar los tipos de sensores en el sistema
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @return \Illuminate\Http\JsonResponse - Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaTipoSensores(){
         // Proteger la consulta
         try {

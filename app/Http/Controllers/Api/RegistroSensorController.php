@@ -10,18 +10,10 @@ use App\Helpers\ProcReduRegiHelper;
 use Throwable;
 
 class RegistroSensorController extends Controller
-{   
-    /* Ejemplo de consulta con filtrado de datos usando Eloquent (ORM de Laravel):
-    $flights = Flight::where('active', 1)
-        ->orderBy('name')
-        ->take(10)
-        ->get();
-    Nota para la elaboracion de la consultas:
-    Se debe usar get() al final si se busca obtener multiples registros y first() en caso de requerir un solo registro. */
-
+{
     /** Metodo para regresar los primeros 10 registros de sensores en el sistema 
-     * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @param \Illuminate\Http\Request $consulta - Arreglo de valores con los elementos enviados desde el cliente
+     * @return \Illuminate\Http\JsonResponse - Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaRegistroSensores(Request $consulta){
         // Establecer la variable que almacenará el arreglo de registros
         $registros = null;
@@ -70,8 +62,8 @@ class RegistroSensorController extends Controller
     }
 
     /** Metodo para regresar los registros especificos acorde a una busqueda 
-     * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @param \Illuminate\Http\Request $consulta - Arreglo de valores con los elementos enviados desde el cliente
+     * @return \Illuminate\Http\JsonResponse - Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaRegistroEspeci(Request $consulta){
         // Validar la información enviada desde el cliente
         $validador = Validator::make($consulta->all(), [

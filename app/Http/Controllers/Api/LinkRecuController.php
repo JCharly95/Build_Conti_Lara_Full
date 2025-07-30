@@ -11,12 +11,11 @@ use App\Helpers\GenLinksHelper;
 use App\Mail\RecuperacionEmail;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
-use Inertia\Inertia;
 
 class LinkRecuController extends Controller
 {
     /** Metodo para obtener todos los enlaces de recuperación guardados
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @return \Illuminate\Http\JsonResponse - Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaEnlacesRecu(){
         // Proteger la petición para en caso de fallo, se le notifique al cliente
         try {
@@ -35,8 +34,8 @@ class LinkRecuController extends Controller
     }
 
     /** Metodo para obtener la ruta del sistema en base al enlace enviado en el correo 
-     * @param string $linkCorreo Link dinamico generado desde el sistema
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @param string $linkCorreo - Link dinamico generado desde el sistema
+     * @return \Illuminate\Http\RedirectResponse - Redireccionamiento hacia la interfaz correspondiente acorde a la respuesta obtenida */
     public function obteRutaActuSis(string $linkCorreo){
         // Validar el link enviado en la consulta desde el cliente
         $validador = Validator::make(['linkCorreo' => $linkCorreo], [
@@ -64,8 +63,8 @@ class LinkRecuController extends Controller
     }
 
     /** Metodo para generar el link de recuperación, guardarlo en la BD y enviar el correo de recuperación 
-     * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @param \Illuminate\Http\Request $consulta - Arreglo de valores con los elementos enviados desde el cliente
+     * @return \Illuminate\Http\RedirectResponse - Redireccionamiento hacia la interfaz correspondiente acorde a la respuesta obtenida */
     public function crearUsuRecu(Request $consulta){
         // Validar los campos enviados en el formulario de solicitud
         $validador = Validator::make($consulta->all(), [

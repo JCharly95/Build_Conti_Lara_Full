@@ -1,5 +1,5 @@
 /* Importar todos los iconos de encabezado contemplados para usar en los modales */
-import { AlertTriangle, AlertCircle, AlertOctagon, CheckCircle, FileText, Upload, Key, FilePlus, LogOut, Clock, Loader, Mail } from "react-feather";
+import { AlertTriangle, AlertCircle, AlertOctagon, CheckCircle, LogOut, Clock, Loader, Mail } from "react-feather";
 
 /** Función para establecer el contenedor de los modales.
  * @param {Object} props - Objeto con las propiedades del modal.
@@ -30,23 +30,16 @@ export default function Modal({ titModal, conteModal, isOpen }){
             break;
         case "Acceso":
         case "Sensor Registrado":
+        case "Sensor Actualizado":
         case "Contraseña Actualizada":
+        case "Sensor Eliminado":
             icono = (<CheckCircle color="green" size={25} className="mr-2"/>);
-            break;
-        case "Recuperar Contraseña":
-            icono = (<FileText color="black" size={25} className="mr-2"/>);
-            break;
-        case "Actualizar Contraseña":
-            icono = (<><Upload color="black" size={25} className="mr-2"/> <Key color="black" size={25} className="mr-2"/></>);
             break;
         case "Cancelar Recuperación de Contraseña":
             icono = (<AlertOctagon color="red" size={25} className="mr-2"/>);
             break;
         case "Aviso de Cancelación":
-            icono = (<AlertTriangle color="red" size={25} className="mr-2"/>);
-            break;
-        case "Agregar Sensor":
-            icono = (<FilePlus color="black" size={25} className="mr-2"/>);
+            icono = (<AlertTriangle color="yellow" size={25} className="mr-2"/>);
             break;
         case "Cerrar Sesión":
             icono = (<LogOut color="black" size={25} className="mr-2"/>);

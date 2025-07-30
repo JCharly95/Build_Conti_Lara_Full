@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useForm, router } from "@inertiajs/react";
 import Modal from "../../../Modal/Modal";
 import Dialog from "../../../Modal/Plantillas/Dialog";
+import DialogCancelar from "../../../Modal/Plantillas/DialogCancel";
 import MenuSelGraf from "../../../NavGraf/ListaSenGraf";
 import MenuSelRegi from "../RegiSensor/ListaSenRegi";
-import { Edit, Trash2 } from "react-feather";
+import { Edit } from "react-feather";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEraser } from "@fortawesome/free-solid-svg-icons";
 
@@ -12,7 +13,8 @@ import { faEraser } from "@fortawesome/free-solid-svg-icons";
  * @returns {JSX.Element} Componente del formulario para edición y eliminación de sensores */
 export default function FormEditarSensor(){
     /* Variables de estado para el modal: apertura y cierre, titulo, contenido del modal
-    
+    Variable de estado para establecer el campo de solo lectura para la unidad de medición
+    Variable de estado para habilitar/deshabilitar la edición en el formulario
     Hook para el formulario cortesia de inertia para poder controlar el estado de los campos del formulario */
     const [modalTitu, setModalTitu] = useState(""),
     [modalConte, setModalConte] = useState(<></>),
@@ -35,6 +37,20 @@ export default function FormEditarSensor(){
 
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
+
+    // Función para la obtención de la respuesta de confirmación para la eliminación del sensor y gestión del proceso en base a dicha respuesta
+    const handleModalElimina = (valSelOpcElimi) => {
+        // Evaluar, que decidio el usuario para saber si continuar con el proceso
+        if(!valSelOpcElimi) {
+            // Codificar el nombre para enviarlo por la URL
+            let nomEncode = encodeURI(data.nomSensor);
+            // Lanzar la petición de eliminación del sensor
+            destroy(`/borSenSel/${nomEncode}`);
+        } else {
+            // Se continuo con la recuperacion, por lo que solo se cerrará el modal de confirmacion de eliminación
+            setModalOpen(false);
+        }
+    }
 
     // Habilitar/Deshabilitar la edición de campos
     const handleEdit = () => ( setHabiEdici(!habiEdici) );
@@ -86,11 +102,19 @@ export default function FormEditarSensor(){
         nomBtn = btnPresi.name;
 
         // Determinar la acción a hacer dependiendo del nombre del boton que causo el envio
-        if(nomBtn === "EditarSensor"){
+        if(nomBtn === "EditarSensor")
             // Enviar a la ruta de procesamiento en el back
-            post('/valiRegiSen');
-        } else {
-            destroy('/valiRegiSen');
+            post('/valiEditSen');
+        else {
+            // Verificar que el nombre del sensor tenga un valor diferente al que está por defecto
+            if(data.nomSensor !== 'Esperando selección')
+                // Mostrar el modal de confirmación de eliminación para cuando el usuario quiera borrar uno de los sensores
+                eliSensor();
+            else {
+                setModalTitu("Error");
+                setModalConte(<Dialog textMsg="Error: No se seleccionó un sensor. Favor de hacerlo."/>);
+                setModalOpen(true);
+            }
         }
     }
     
@@ -105,6 +129,14 @@ export default function FormEditarSensor(){
 
         // Redirigir hacia la grafica después de 2 segundos
         setTimeout(() => (router.get('/grafica', {}, { replace: true })), 2000);
+    }
+
+    /** Función para desplegar el modal de confirmación de eliminación en caso de que el usuario desee eliminar uno de los sensores del sistema */
+    function eliSensor(){
+        // Si se opta por eliminar el sensor, se lanzará un modal de confirmacion previo a realizar el cambio
+        setModalTitu("Eliminar Sensor");
+        setModalConte(<DialogCancelar textMsg={`¿Esta seguro que desea eliminar el sensor ${data.nomSensor}?`} textSoli="eliminación" opcSel={handleModalElimina} />);
+        setModalOpen(true);
     }
 
     return(

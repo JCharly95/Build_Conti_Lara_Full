@@ -6,7 +6,7 @@ class FechaServerHelper
 {
     /** Función para generar una fecha con formato de salida: Y-m-d H:i:s en el servidor
      * @param int $valFecha Variable numerica con la fecha a convertir (puede ser omitida)
-     * @return String Cadena de texto con la fecha convertida */
+     * @return string Cadena de texto con la fecha convertida */
     public function genFecha($valFecha = 404){
         // Obtener la zona horaria inicial
         $zonaHorIni = date_default_timezone_get();

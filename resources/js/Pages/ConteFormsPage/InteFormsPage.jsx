@@ -26,10 +26,24 @@ function ContenedorFormulariosPage({ nomFormVer, msgConclu }){
                 setModalTitu("Sensor Registrado");
                 setModalConte(<Dialog textMsg={msgConclu}/>);
                 setModalOpen(true);
-                
-                // Redireccionamiento hacia la grafica despues de 2.5 segundos
-                setTimeout( () => ( router.get('/grafica', {}, { replace: true }) ), 2500);
             }
+
+            // Mostrar el modal de aviso satisfactorio para la modificación del sensor
+            if(msgConclu.includes("actualizado exitosamente") || msgConclu.includes("paso a llamarse") || msgConclu.includes("cambió su referencia de")) {
+                setModalTitu("Sensor Actualizado");
+                setModalConte(<Dialog textMsg={msgConclu}/>);
+                setModalOpen(true);
+            }
+
+            // Mostrar el modal de aviso satisfactorio para la eliminación del sensor
+            if(msgConclu.includes("eliminado exitosamente")) {
+                setModalTitu("Sensor Eliminado");
+                setModalConte(<Dialog textMsg={msgConclu}/>);
+                setModalOpen(true);
+            }
+            
+            // Redirigir a la ventana de la grafica después de 2.5 segundos
+            setTimeout(() => ( router.get('/grafica', {}, { replace: true }) ), 2500);
         }
     }, [msgConclu]);
     

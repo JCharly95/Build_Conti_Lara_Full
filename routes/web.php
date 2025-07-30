@@ -107,3 +107,6 @@ Route::post('/valiRegiSen', [SensorController::class, "regiSensor"])->name("vali
 
 // Ruta para enviar a validar la información del formulario para la edición de un sensor "validarEditSen" para el enrutamiento de laravel; y actualizar la información del sensor si se cumplen con los criterios establecidos en el formulario
 Route::post('/valiEditSen', [SensorController::class, "editarSensor"])->name("validarEditSen");
+
+// Ruta para eliminar el sensor seleccionado en el formulario de edición y eliminación de sensores
+Route::delete('/borSenSel/{nombreSensor}', [SensorController::class, "borrarSensor"])->name("eliminarSensor");

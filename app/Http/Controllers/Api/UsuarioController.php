@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Link_Recu;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +19,7 @@ class UsuarioController extends Controller
     }
 
     /** Metodo para regresar todos los usuarios registrados 
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @return \Illuminate\Http\JsonResponse - Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
     public function listaUsuarios(){
         // Proteger la consulta
         try {
@@ -39,8 +38,8 @@ class UsuarioController extends Controller
     }
 
     /** Metodo para autenticar el acceso del usuario en el login
-     * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
-     * @return \Illuminate\Http\RedirectResponse Redireccionamiento a la interfaz correspondiente, segun la respuesta obtenida */
+     * @param \Illuminate\Http\Request $consulta - Arreglo de valores con los elementos enviados desde el cliente
+     * @return \Illuminate\Http\RedirectResponse - Redireccionamiento a la interfaz correspondiente, segun la respuesta obtenida */
     public function accesoLogin(Request $consulta){
         // Validar los campos del formulario login y deteminar los mensajes de error en caso de que no se cumplan las reglas establecidas
         $validador = Validator::make($consulta->all(), [
@@ -100,9 +99,9 @@ class UsuarioController extends Controller
     }
 
     /** Metodo para actualizar la fecha del ultimo acceso 
-     * @param String $valDirCor Correo ingresado en el login
-     * @return \Illuminate\Http\JsonResponse Respuesta JSON del resultado para la actualización de la fecha de acceso */
-    public function nueValUltiAcc(String $valDirCor){
+     * @param string $valDirCor - Cadena de texto con el correo ingresado en el login
+     * @return \Illuminate\Http\JsonResponse - Respuesta JSON del resultado para la actualización de la fecha de acceso */
+    public function nueValUltiAcc(string $valDirCor){
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
             // NOTA Futura: Si se obtendrá algun modelo de la BD y posteriormente se modificará alguno de sus campos, se deberá omitir el select si no se requiere extraer valores especificos. Pero si es el caso, se deberá incluir el campo de id de la tabla para que Eloquent identifique el registro donde actualizará el valor en cuestión por medio de su id.
@@ -143,7 +142,7 @@ class UsuarioController extends Controller
 
     /** Metodo para actualizar la contraseña en el sistema
      * @param \Illuminate\Http\Request $consulta Arreglo de valores con los elementos enviados desde el cliente
-     * @return \Illuminate\Http\JsonResponse Respuesta obtenida en formato JSON tanto mensaje de error como arreglo de registros */
+     * @return \Illuminate\Http\RedirectResponse - Redireccionamiento a la interfaz correspondiente, segun la respuesta obtenida */
     public function actuContra(Request $consulta){
         // Agregar a la session la información de respuesta para el formulario en el front
         $consulta->session()->put('form', ['linkSoli' => $consulta->linkSis, 'datosUser' => $consulta->codigo.'/'.$consulta->nomPerso]);
