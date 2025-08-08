@@ -39,7 +39,7 @@ export default function Modal({ titModal, conteModal, isOpen }){
             icono = (<AlertOctagon color="red" size={25} className="mr-2"/>);
             break;
         case "Aviso de Cancelación":
-            icono = (<AlertTriangle color="yellow" size={25} className="mr-2"/>);
+            icono = (<AlertTriangle color="orange" size={25} className="mr-2"/>);
             break;
         case "Cerrar Sesión":
             icono = (<LogOut color="black" size={25} className="mr-2"/>);

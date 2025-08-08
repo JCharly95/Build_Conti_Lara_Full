@@ -4,6 +4,8 @@ import useVentaDimen from "../../Hooks/tamVentaHook";
 import ReactApexChart from "react-apexcharts";
 import esp from "apexcharts/dist/locales/es.json";
 import CrearReportePDF from "../../Logic/genReporPDF";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 // infoSenSel: { infoSensor: sensorBusc, arrFechas: arrFechSel }
 export default function Grafica({ infoSenSel, datosGrafica }){
@@ -35,7 +37,7 @@ export default function Grafica({ infoSenSel, datosGrafica }){
 
     return(
         <section ref={areaGrafRef} className="md:h-[73dvh] mt-4 z-0">
-            <ReactApexChart type="line" options={opcsGrafi} series={seriesGraf} width={(ventaDimen.width) / 1.5} height={(ventaDimen.height) / 1.5}/>
+            <ReactApexChart type="line" options={opcsGrafi} series={seriesGraf} width={(ventaDimen.width >= 1000) ? ((ventaDimen.width) / 1.5) : ((ventaDimen.width) / 1.1)} height={(ventaDimen.height) / 1.5}/>
         </section>
     );
 }
@@ -139,7 +141,8 @@ function defOpcsGraf(areaGrafRef, grafDatos, grafEtiq, senDatos, fechas){
                     customIcons: [{
                         icon: 'PDF',
                         title: 'Exportar a PDF',
-                        class: 'custom-icon',
+                        index: 5,
+                        class: 'custom-icon ml-1 mr-3',
                         click: function exportPDF(){
                             CrearReportePDF(areaGrafRef, grafDatos, nomSensor, nomUniMedi, fechas[0], fechas[1]);
                         }

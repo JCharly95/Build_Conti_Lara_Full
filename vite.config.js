@@ -26,4 +26,8 @@ export default defineConfig({
             '@' : "/resources/js",
         },
     },
+    /*server: {
+        host: '101.40.4.131', // Establecer la dirección IP desde donde el servidor (php artisan) entragará el contenido del sitio
+        cors: true, // Allow all origins for local development
+    },*/
 });
