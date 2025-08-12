@@ -32,8 +32,7 @@ class User extends Authenticatable
         'Ape_Mat',
         'Nombre',
         'Correo',
-        'UltimoAcceso',
-        'Contra'
+        'UltimoAcceso'
     ];
 
     /** Los atributos que deben ser ocultados para la serialización. (Ocultos en consultas get)

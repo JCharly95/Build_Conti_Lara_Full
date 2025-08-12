@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use App\Helpers\FechaServerHelper;
+use RuntimeException;
+use Illuminate\Support\Facades\Log;
 
 class UsuarioController extends Controller
 {
@@ -58,43 +60,72 @@ class UsuarioController extends Controller
 
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
-            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['Correo'])->first();
+            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['ID_User', 'Correo', 'Contra'])->first();
 
             // Regresar un error en caso de no encontrar al usuario
-            if(!$usuario)
+            if(!$usuario) {
                 return back()->withErrors(['dirCorr' => 'Error: El usuario ingresado no esta registrado.']);
+            } else {
+                // Hacer visible la contraseña una vez obtenido el usuario
+                $usuario->makeVisible('Contra');
 
-            try {
-                // Autenticar al usuario con la información ingresada en el formulario
-                if(Auth::attempt(['Correo' => $consulta->dirCorr, 'password' => $consulta->valPass])) {
-                    try {
-                        // Actualizar la ultima fecha de acceso en la BD
-                        $resActuFech = $this->nueValUltiAcc($consulta->dirCorr);
-
-                        // Regresar un error si la respuesta de la actualización no trae información
-                        if(!$resActuFech->getContent())
-                            return back()->withErrors(['dirCorr' => 'Error: No se pudo completar el proceso de acceso.']);
-                        
-                        // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
-                        $resActuFechConve = $resActuFech->getData(true);
-            
-                        // Si se obtuvo un error en el proceso se regresará un error de sistema
-                        if(array_key_exists('msgError', $resActuFechConve))
-                            return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
-            
-                        // Si el usuario fue autenticado se regresa al formulario con mensaje satisfactorio
-                        return back()->with(['results' => 'Acceso concedido. Bienvenido a Building Continuity']);
-                    } catch(Throwable $exception) {
-                        return back()->withErrors([ 'dirCorr' => 'Error: El usuario no pudo acceder. Causa: '.$exception->getMessage()]);
+                // Evaluar si la contraseña del usuario necesita ser rehasheada
+                try {
+                    if(Hash::check($consulta->valPass, $usuario->Contra)) {
+                        // Evaluar si la contraseña guardada necesita rehashearse y hacerlo si es el caso
+                        if(Hash::needsRehash($usuario->Contra)) {
+                            $usuario->Contra = Hash::make($consulta->valPass);
+                            $resActuPass = $usuario->save();
+    
+                            // Regresar un error si no se pudo actualizar la contraseña
+                            if(!$resActuPass)
+                                return back()->withErrors(['valPass' => 'Error: El sistema no pudo procesar su contraseña. Favor de intentar nuevamente.']);
+                        }
                     }
-                } else {
-                    return back()->withErrors(['dirCorr' => 'Error: Favor de revisar la información ingresada. El usuario no pudo acceder.']);
+                } catch(RuntimeException $hashException) {
+                    // Si las sentencias de evaluacion Hash tronaron, quiere decir que la contraseña es de bcryptjs y no puede ser evaluada con bcrypt nativo y no es valida, por lo que se tiene que rehashear
+                    $usuario->Contra = Hash::make($consulta->valPass);
+                    $resActuPass = $usuario->save();
+                    // Ademas se dejará registro en los accesos locales de laravel, que usuarios fueron rehasheados
+                    Log::info("La contraseña del usuario con el correo: ".$consulta->dirCorr." fue rehasheada. Por la siguiente causa: ".$hashException->getMessage());
                 }
-            } catch (Throwable $exception2) {
-                return back()->withErrors(['dirCorr' => 'Error: El usuario no fue autorizado para acceder. Causa: '.$exception2->getMessage()]);
+                
+                try {
+                    // Si no fue necesario rehashear la contraseña, se continua con el login, en este caso:
+                    // Autenticar al usuario con la información ingresada en el formulario
+                    if(Auth::attempt(['Correo' => $consulta->dirCorr, 'password' => $consulta->valPass])) {
+                        try {
+                            // Actualizar la ultima fecha de acceso en la BD
+                            $resActuFech = $this->nueValUltiAcc($consulta->dirCorr);
+
+                            // Regresar un error si la respuesta de la actualización no trae información
+                            if(!$resActuFech->getContent())
+                                return back()->withErrors(['dirCorr' => 'Error: No se pudo completar el proceso de acceso.']);
+                            
+                            // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
+                            $resActuFechConve = $resActuFech->getData(true);
+                
+                            // Si se obtuvo un error en el proceso se regresará un error de sistema
+                            if(array_key_exists('msgError', $resActuFechConve))
+                                return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
+                
+                            // Ocultar la contraseña nuevamente antes de redireccionar
+                            $usuario->makeHidden('Contra');
+
+                            // Si el usuario fue autenticado se regresa al formulario con mensaje satisfactorio
+                            return back()->with(['results' => 'Acceso concedido. Bienvenido a Building Continuity']);
+                        } catch(Throwable $exception3) {
+                            return back()->withErrors(['dirCorr' => 'Error: El usuario no pudo acceder. Causa: '.$exception3->getMessage()]);
+                        }
+                    } else {
+                        return back()->withErrors(['dirCorr' => 'Error: Favor de revisar la información ingresada. El usuario no pudo acceder.']);
+                    }
+                } catch (Throwable $exception2) {
+                    return back()->withErrors(['dirCorr' => 'Error: El usuario no fue autorizado para acceder. Causa: '.$exception2->getMessage()]);
+                }
             }
         } catch(Throwable $exception1) {
-            return back()->withErrors(['dirCorr' => 'Error: No se obtuvo la información con respecto al usuario. Causa: '.$exception1->getMessage()]);
+            return back()->withErrors(['dirCorr' => 'Error: Favor de intentar nuevamente. No se pudo obtener la información del usuario. Causa: '.$exception1->getMessage()]);
         }
     }
 
@@ -174,51 +205,58 @@ class UsuarioController extends Controller
             ])->select(['ID_User', 'Cod_User', 'Nombre', 'Contra'])->first();
     
             // Retornar error si no se encuentra al usuario solicitado
-            if(!$usuario)
+            if(!$usuario) {
                 return back()->withErrors(['nueValContra' => 'Error: El usuario que desea recuperar no se encuentra registrado.']);
+            } else {
+                // Hacer visible la contraseña una vez obtenido el usuario
+                $usuario->makeVisible('Contra');
 
-            // Comparar el valor de la nueva contraseña con el actual para revisar si la nueva contraseña es diferente a la anterior
-            if(Hash::check($consulta->nueValContra, $usuario->Contra))
-                return back()->withErrors(['nueValContra' => 'Error: Favor de actualizar la contraseña apropiadamente.']);
-
-            // Hashear la nueva contraseña y actualizarla en la BD
-            try {
-                /* Establecer el nuevo valor de la contraseña como un string hasheado si se cumplen todas condiciones a continuación:
-                 * La consulta HTTP que llama la función tiene el parametro de entrada llamado "codigo" y si la información de este parametro es exactamente igual al parametro "Cod_User" obtenido del usuario en la BD
-                 * La consulta HTTP que llama la función tiene el parametro de entrada llamado "nomPerso" y si la información de este parametro es exactamente igual al parametro "Nombre" obtenido del usuario en la BD */
-                if(($consulta->has('codigo') && ($consulta->codigo === $usuario->Cod_User)) && ($consulta->has('nomPerso') && ($consulta->nomPerso === $usuario->Nombre)) && $consulta->has('nueValContra'))
-                    $usuario->Contra = Hash::make($consulta->nueValContra);
-
-                // Actualizar el valor de la contraseña en la BD
-                $resActuPass = $usuario->save();
-
-                // Regresar un error si no se pudo actualizar la contraseña
-                if(!$resActuPass)
-                    return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo actualizar su contraseña. Favor de intentar nuevamente desde su correo.']);
-
-                // Una vez actualizado el valor de la contraseña satisfactoriamente, se procederá con el borrado del link para caducarlo
+                // Comparar el valor de la nueva contraseña con el actual para revisar si la nueva contraseña es diferente a la anterior
+                if(Hash::check($consulta->nueValContra, $usuario->Contra))
+                    return back()->withErrors(['nueValContra' => 'Error: Favor de actualizar la contraseña apropiadamente.']);
+    
+                // Hashear la nueva contraseña y actualizarla en la BD
                 try {
-                    $soliBorLink = app(LinkRecuController::class)->borLinkRecu($consulta->linkSis, 1);
+                    /* Establecer el nuevo valor de la contraseña como un string hasheado si se cumplen todas condiciones a continuación:
+                     * La consulta HTTP que llama la función tiene el parametro de entrada llamado "codigo" y si la información de este parametro es exactamente igual al parametro "Cod_User" obtenido del usuario en la BD
+                     * La consulta HTTP que llama la función tiene el parametro de entrada llamado "nomPerso" y si la información de este parametro es exactamente igual al parametro "Nombre" obtenido del usuario en la BD */
+                    if(($consulta->has('codigo') && ($consulta->codigo === $usuario->Cod_User)) && ($consulta->has('nomPerso') && ($consulta->nomPerso === $usuario->Nombre)) && $consulta->has('nueValContra'))
+                        $usuario->Contra = Hash::make($consulta->nueValContra);
+    
+                    // Actualizar el valor de la contraseña en la BD
+                    $resActuPass = $usuario->save();
+    
+                    // Regresar un error si no se pudo actualizar la contraseña
+                    if(!$resActuPass)
+                        return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo actualizar su contraseña. Favor de intentar nuevamente desde su correo.']);
+    
+                    // Una vez actualizado el valor de la contraseña satisfactoriamente, se procederá con el borrado del link para caducarlo
+                    try {
+                        $soliBorLink = app(LinkRecuController::class)->borLinkRecu($consulta->linkSis, 1);
+    
+                        // Regresar un error si la respuesta de la eliminación no trae información
+                        if(!$soliBorLink->getContent())
+                            return back()->withErrors(['nueValContra' => 'Error: El proceso de recuperación se vio interrumpido por causa del enlace de recuperación. Favor de intentar nuevamente desde su correo.']);
+    
+                        // Decodificar la respuesta de la eliminación del link de recuperación como arreglo asociativo
+                        $soliBorLinkConve = $soliBorLink->getData(true);
+    
+                        // Si se obtuvo un error en el proceso se regresará un error de sistema
+                        if(array_key_exists('msgError', $soliBorLinkConve))
+                            return back()->withErrors(['nueValContra' => $soliBorLinkConve['msgError']]);
 
-                    // Regresar un error si la respuesta de la eliminación no trae información
-                    if(!$soliBorLink->getContent())
-                        return back()->withErrors(['nueValContra' => 'Error: El proceso de recuperación se vio interrumpido por causa del enlace de recuperación. Favor de intentar nuevamente desde su correo.']);
-
-                    // Decodificar la respuesta de la eliminación del link de recuperación como arreglo asociativo
-                    $soliBorLinkConve = $soliBorLink->getData(true);
-
-                    // Si se obtuvo un error en el proceso se regresará un error de sistema
-                    if(array_key_exists('msgError', $soliBorLinkConve))
-                        return back()->withErrors(['nueValContra' => $soliBorLinkConve['msgError']]);
-
-                    // Borrar la información sensible de la sesión y regresar al formulario de actualización para mostrar el mensaje de proceso concluido satisfactoriamente
-                    $consulta->session()->forget('form');
-                    return back()->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
-                } catch(Throwable $exception3) {
-                    return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo procesar el enlace de recuperación apropiadamente. Causa: '.$exception3->getMessage()]);
+                        // Ocultar la contraseña nuevamente antes de redireccionar
+                        $usuario->makeHidden('Contra');
+    
+                        // Borrar la información sensible de la sesión y regresar al formulario de actualización para mostrar el mensaje de proceso concluido satisfactoriamente
+                        $consulta->session()->forget('form');
+                        return back()->with('results', 'La contraseña de '.$consulta->nomPerso.' fue actualizada exitosamente.');
+                    } catch(Throwable $exception3) {
+                        return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo procesar el enlace de recuperación apropiadamente. Causa: '.$exception3->getMessage()]);
+                    }
+                } catch(Throwable $exception2) {
+                    return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo actualizar su contraseña. Causa: '.$exception2->getMessage()]);
                 }
-            } catch(Throwable $exception2) {
-                return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo actualizar su contraseña. Causa: '.$exception2->getMessage()]);
             }
         } catch(Throwable $exception1) {
             return back()->withErrors(['nueValContra' => 'Error: El sistema no pudo encontrar al usuario que desea actualizar. Causa: '.$exception1->getMessage()]);
