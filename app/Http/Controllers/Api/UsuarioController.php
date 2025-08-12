@@ -60,69 +60,40 @@ class UsuarioController extends Controller
 
         try {
             // Buscar al primer usuario que coincida con el correo ingresado en el login
-            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['ID_User', 'Correo', 'Contra'])->first();
+            $usuario = User::where('Correo', '=', $consulta->dirCorr)->select(['Correo'])->first();
 
             // Regresar un error en caso de no encontrar al usuario
-            if(!$usuario) {
+            if(!$usuario)
                 return back()->withErrors(['dirCorr' => 'Error: El usuario ingresado no esta registrado.']);
-            } else {
-                // Hacer visible la contraseña una vez obtenido el usuario
-                $usuario->makeVisible('Contra');
+            
+            try {
+                // Autenticar al usuario con la información ingresada en el formulario
+                if(Auth::attempt(['Correo' => $consulta->dirCorr, 'password' => $consulta->valPass])) {
+                    try {
+                        // Actualizar la ultima fecha de acceso en la BD
+                        $resActuFech = $this->nueValUltiAcc($consulta->dirCorr);
 
-                // Evaluar si la contraseña del usuario necesita ser rehasheada
-                try {
-                    if(Hash::check($consulta->valPass, $usuario->Contra)) {
-                        // Evaluar si la contraseña guardada necesita rehashearse y hacerlo si es el caso
-                        if(Hash::needsRehash($usuario->Contra)) {
-                            $usuario->Contra = Hash::make($consulta->valPass);
-                            $resActuPass = $usuario->save();
-    
-                            // Regresar un error si no se pudo actualizar la contraseña
-                            if(!$resActuPass)
-                                return back()->withErrors(['valPass' => 'Error: El sistema no pudo procesar su contraseña. Favor de intentar nuevamente.']);
-                        }
+                        // Regresar un error si la respuesta de la actualización no trae información
+                        if(!$resActuFech->getContent())
+                            return back()->withErrors(['dirCorr' => 'Error: No se pudo completar el proceso de acceso.']);
+                        
+                        // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
+                        $resActuFechConve = $resActuFech->getData(true);
+            
+                        // Si se obtuvo un error en el proceso se regresará un error de sistema
+                        if(array_key_exists('msgError', $resActuFechConve))
+                            return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
+
+                        // Si el usuario fue autenticado se regresa al formulario con mensaje satisfactorio
+                        return back()->with(['results' => 'Acceso concedido. Bienvenido a Building Continuity']);
+                    } catch(Throwable $exception3) {
+                        return back()->withErrors(['dirCorr' => 'Error: El usuario no pudo acceder. Causa: '.$exception3->getMessage()]);
                     }
-                } catch(RuntimeException $hashException) {
-                    // Si las sentencias de evaluacion Hash tronaron, quiere decir que la contraseña es de bcryptjs y no puede ser evaluada con bcrypt nativo y no es valida, por lo que se tiene que rehashear
-                    $usuario->Contra = Hash::make($consulta->valPass);
-                    $resActuPass = $usuario->save();
-                    // Ademas se dejará registro en los accesos locales de laravel, que usuarios fueron rehasheados
-                    Log::info("La contraseña del usuario con el correo: ".$consulta->dirCorr." fue rehasheada. Por la siguiente causa: ".$hashException->getMessage());
+                } else {
+                    return back()->withErrors(['dirCorr' => 'Error: Favor de revisar la información ingresada. El usuario no pudo acceder.']);
                 }
-                
-                try {
-                    // Si no fue necesario rehashear la contraseña, se continua con el login, en este caso:
-                    // Autenticar al usuario con la información ingresada en el formulario
-                    if(Auth::attempt(['Correo' => $consulta->dirCorr, 'password' => $consulta->valPass])) {
-                        try {
-                            // Actualizar la ultima fecha de acceso en la BD
-                            $resActuFech = $this->nueValUltiAcc($consulta->dirCorr);
-
-                            // Regresar un error si la respuesta de la actualización no trae información
-                            if(!$resActuFech->getContent())
-                                return back()->withErrors(['dirCorr' => 'Error: No se pudo completar el proceso de acceso.']);
-                            
-                            // Decodificar la respuesta de la actualización de fecha como arreglo asociativo
-                            $resActuFechConve = $resActuFech->getData(true);
-                
-                            // Si se obtuvo un error en el proceso se regresará un error de sistema
-                            if(array_key_exists('msgError', $resActuFechConve))
-                                return back()->withErrors(['dirCorr' => $resActuFechConve['msgError']]);
-                
-                            // Ocultar la contraseña nuevamente antes de redireccionar
-                            $usuario->makeHidden('Contra');
-
-                            // Si el usuario fue autenticado se regresa al formulario con mensaje satisfactorio
-                            return back()->with(['results' => 'Acceso concedido. Bienvenido a Building Continuity']);
-                        } catch(Throwable $exception3) {
-                            return back()->withErrors(['dirCorr' => 'Error: El usuario no pudo acceder. Causa: '.$exception3->getMessage()]);
-                        }
-                    } else {
-                        return back()->withErrors(['dirCorr' => 'Error: Favor de revisar la información ingresada. El usuario no pudo acceder.']);
-                    }
-                } catch (Throwable $exception2) {
-                    return back()->withErrors(['dirCorr' => 'Error: El usuario no fue autorizado para acceder. Causa: '.$exception2->getMessage()]);
-                }
+            } catch (Throwable $exception2) {
+                return back()->withErrors(['dirCorr' => 'Error: El usuario no fue autorizado para acceder. Causa: '.$exception2->getMessage()]);
             }
         } catch(Throwable $exception1) {
             return back()->withErrors(['dirCorr' => 'Error: Favor de intentar nuevamente. No se pudo obtener la información del usuario. Causa: '.$exception1->getMessage()]);
