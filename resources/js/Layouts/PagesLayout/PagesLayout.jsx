@@ -21,7 +21,7 @@ export default function PagesLayout({ children }){
     const handleModal = (estado) => ( setModalOpen(estado) );
 
     // UseEffect para monitorear el uso de teclas F12 para consola y menu contextual, asi como el clic derecho, tambien menu contextual
-    /*useEffect(() => {
+    useEffect(() => {
         const funEscuTecla = (evento) => {
             if(evento.key == "F12") {
                 evento.preventDefault();
@@ -46,7 +46,7 @@ export default function PagesLayout({ children }){
             window.removeEventListener("keydown", funEscuTecla);
             window.removeEventListener("contextmenu", funEscuClic);
         };
-    }, []);*/
+    }, []);
 
     /*----------------------------Seccion de Inactividad---------------------------------------------*/
     /** Función para establecer los elementos de evaluación para la inactividad en pantalla */
