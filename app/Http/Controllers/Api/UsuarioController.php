@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use App\Helpers\FechaServerHelper;
-use RuntimeException;
-use Illuminate\Support\Facades\Log;
 
 class UsuarioController extends Controller
 {

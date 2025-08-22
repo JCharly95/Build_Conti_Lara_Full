@@ -35,7 +35,7 @@ class SensorController extends Controller
     public function listaSenRegi(){
         // Proteger la consulta para obtención de la lista de sensores
         try {
-            $listaSenRegi = Sensor::select('sensor.ID_Sensor' ,'sensor.Nombre', 'history_type_map.ID_', 'history_type_map.VALUEFACETS')->join('history_type_map', 'sensor.Tipo_ID', '=', 'history_type_map.ID')->orderBy('sensor.ID_Sensor')->get();
+            $listaSenRegi = Sensor::select('sensor.ID_Sensor', 'sensor.Nombre', 'history_type_map.ID_', 'history_type_map.VALUEFACETS')->join('history_type_map', 'sensor.Tipo_ID', '=', 'history_type_map.ID')->orderBy('sensor.ID_Sensor')->get();
     
             // Regresar un error si no se encontraron los sensores
             if($listaSenRegi->isEmpty())
@@ -169,7 +169,7 @@ class SensorController extends Controller
 
         // Buscar el primer sensor basado en la información provista por los campos del formulario.
         try {
-            $senEval = Sensor::select('sensor.ID_Sensor' ,'sensor.Nombre', 'sensor.Tipo_ID', 'history_type_map.ID_')
+            $senEval = Sensor::select('sensor.ID_Sensor', 'sensor.Nombre', 'sensor.Tipo_ID', 'history_type_map.ID_')
             ->join('history_type_map', 'sensor.Tipo_ID', '=', 'history_type_map.ID')
             ->where('sensor.Nombre', '=', $consulta->nomSensor)
             ->orWhere('history_type_map.ID_', '=', $consulta->idNiagSensor)->first();

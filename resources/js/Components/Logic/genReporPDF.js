@@ -108,7 +108,7 @@ export default async function CrearReportePDF(areaGrafica, datos, nomSensor, uni
  * @returns {number} La posicion vertical del la ultima tabla dibujada cortesia de autotable */
 function agreTbl(objDoc, objConfig){
     // Generar y agregar la tabla solicitada en el documento
-    autoTable(objDoc ,objConfig);
+    autoTable(objDoc, objConfig);
     // Regresar la ultima posicion de pintado de la tabla
     return objDoc.lastAutoTable.finalY;
 }
