@@ -6,6 +6,15 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 @source '../**/*.jsx';
+/* Agregando las rutas de recursos visuales que podrian faltar */
+@source '../../resources/views/**/*.blade.php';
+@source '../../resources/js/**/*.js';
+@source '../../resources/js/**/*.jsx';
+/* Agregando las rutas de componentes front, para hacer un analisis mas especifico */
+@source '../../resources/js/Components/**/*.js';
+@source '../../resources/js/Layouts/**/*.js';
+@source '../../resources/js/Pages/**/*.js';
+
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
