@@ -72,34 +72,37 @@ class SensorController extends Controller
             if($validador->fails())
                 return back()->withErrors($validador);
             
-            // Si la validación no regreso errores, el siguiente paso es buscar si el sensor a registrar ya existe en el sistema
-            try {
-                // Obtener la lista de sensores registrados
-                $sensoRegi = $this->listaSenRegi();
-    
-                // Regresar un error si la respuesta de los sensores no trae información
-                if(!$sensoRegi->getContent())
-                    return back()->withErrors(['idNiagSensor' => 'Error: El sistema no encontró parte de la información vitalicia para el proceso. Favor de intentar nuevamente.']);
-    
-                // Decodificar la respuesta de la lista de sensores registrados como arreglo asociativo
-                $senDatos = $sensoRegi->getData(true);
-    
-                // Si se obtuvo un error de busqueda se regresará un error de procesamiento del sistema
-                if(array_key_exists('msgError', $senDatos))
-                    return back()->withErrors(['idNiagSensor' => $senDatos['msgError']]);
-    
-                // Si no, se recorrera el resultado en busqueda de algún registro previo
-                foreach($senDatos['results'] as $sensor) {
-                    if($sensor['ID_'] == $consulta->idNiagSensor || $sensor['Nombre'] == $consulta->nomSensor) {
-                        if($sensor['ID_'] == $consulta->idNiagSensor)
-                            return back()->withErrors(['idNiagSensor' => 'Error: El sensor que desea registrar ya existe en el sistema.']);
-                        
-                        if($sensor['Nombre'] == $consulta->nomSensor)
-                            return back()->withErrors(['nomSensor' => 'Error: El nombre que desea utilizar ya esta existe en el sistema y esta relacionado a otro sensor.']);
+            // Proceso de instalación: Confirmar que no se tienen registros de sensores en el sistema y hacer la busqueda de sensor existente
+            if(Sensor::all()->count() !== 0) {
+                // Si la validación no regreso errores, el siguiente paso es buscar si el sensor a registrar ya existe en el sistema
+                try {
+                    // Obtener la lista de sensores registrados
+                    $sensoRegi = $this->listaSenRegi();
+        
+                    // Regresar un error si la respuesta de los sensores no trae información
+                    if(!$sensoRegi->getContent())
+                        return back()->withErrors(['idNiagSensor' => 'Error: El sistema no encontró parte de la información vitalicia para el proceso. Favor de intentar nuevamente.']);
+        
+                    // Decodificar la respuesta de la lista de sensores registrados como arreglo asociativo
+                    $senDatos = $sensoRegi->getData(true);
+        
+                    // Si se obtuvo un error de busqueda se regresará un error de procesamiento del sistema
+                    if(array_key_exists('msgError', $senDatos))
+                        return back()->withErrors(['idNiagSensor' => $senDatos['msgError']]);
+        
+                    // Si no, se recorrera el resultado en busqueda de algún registro previo
+                    foreach($senDatos['results'] as $sensor) {
+                        if($sensor['ID_'] == $consulta->idNiagSensor || $sensor['Nombre'] == $consulta->nomSensor) {
+                            if($sensor['ID_'] == $consulta->idNiagSensor)
+                                return back()->withErrors(['idNiagSensor' => 'Error: El sensor que desea registrar ya existe en el sistema.']);
+                            
+                            if($sensor['Nombre'] == $consulta->nomSensor)
+                                return back()->withErrors(['nomSensor' => 'Error: El nombre que desea utilizar ya esta existe en el sistema y esta relacionado a otro sensor.']);
+                        }
                     }
+                } catch(Throwable $exception) {
+                    return back()->withErrors(['nomSensor' => 'Error: El sistema no pudo encontrar sensores registrados. Causa: '.$exception->getMessage()]);
                 }
-            } catch(Throwable $exception) {
-                return back()->withErrors(['nomSensor' => 'Error: El sistema no pudo encontrar sensores registrados. Causa: '.$exception->getMessage()]);
             }
         }
 

@@ -1,5 +1,4 @@
 import './bootstrap';
-import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import MainLayout from './Layouts/MainLayout/MainLayout';
