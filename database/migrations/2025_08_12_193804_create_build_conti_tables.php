@@ -34,7 +34,7 @@ return new class extends Migration
         });
 
         // Check if the 'history_type_map' table exists before adding the foreign key
-        if (Schema::hasTable('history_type_map')) {
+        if(Schema::hasTable('history_type_map')) {
             Schema::table('sensor', function (Blueprint $table) {
                 $table->foreignId('Tipo_ID')->constrained(
                     table: 'history_type_map', indexName: 'Sensor_Tipo'

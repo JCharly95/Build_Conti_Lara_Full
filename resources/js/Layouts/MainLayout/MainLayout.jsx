@@ -15,6 +15,26 @@ export default function MainLayout({ children }){
     // Mostrar/Ocultar el modal
     const handleModal = (estado) => ( setModalOpen(estado) );
 
+    // UseEffect para evaluar la compatibilidad del navegador usado por el cliente para acceder
+    useEffect(() => {
+        /** Función para evaluar la compatibilidad del navegador del cliente
+         * @returns {boolean} Variable booleana con el resultado de la evaluación */
+        const checkNavCompa = () => {
+            try {
+                return(typeof(fetch !== "undefined") && typeof(Promise !== "undefined") && typeof(Object.assign !== "undefined") && typeof(window.IntersectionObserver !== "undefined") && CSS.supports("color", "oklch(50% 0.2 30)"));
+            } catch (errorCompati) {
+                return false;
+            }
+        };
+
+        // Si el navegador no es compatible, lanzar un modal de error para advertir al usuario
+        if(!checkNavCompa()) {
+            setModalTitu("Error");
+            setModalConte(<Dialog textMsg="Su navegador es demasiado antiguo y no es compatible con el sistema. Por favor, actualice a una versión más reciente."/>);
+            setModalOpen(true);
+        }
+    }, []);
+
     // UseEffect para monitorear el uso de teclas F12 para consola y menu contextual, asi como el clic derecho, tambien menu contextual
     useEffect(() => {
         const funEscuTecla = (evento) => {
