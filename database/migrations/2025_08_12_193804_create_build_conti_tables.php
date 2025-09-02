@@ -31,8 +31,17 @@ return new class extends Migration
         Schema::create('sensor', function (Blueprint $table) {
             $table->id('ID_Sensor');
             $table->string('Nombre', length: 150);
-            $table->integer('Tipo_ID');
+            $table->unsignedBigInteger('Tipo_ID');
         });
+
+        // Check if the 'history_type_map' table exists before adding the foreign key
+        if (Schema::hasTable('history_type_map')) {
+            Schema::table('sensor', function (Blueprint $table) {
+                $table->foreignId('Tipo_ID')->constrained(
+                    table: 'history_type_map', indexName: 'Sensor_Tipo'
+                );
+            });
+        }
     }
 
     /**
@@ -42,6 +51,10 @@ return new class extends Migration
     {
         Schema::dropIfExists('usuarios');
         Schema::dropIfExists('links_recuperacion');
+        // Delete foreign key from sensor table before delete table
+        Schema::table('sensor', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('Tipo_ID');
+        });
         Schema::dropIfExists('sensor');
     }
 };

@@ -82,7 +82,7 @@ export default function FormAcceso({ chgForm }){
                         </section>
                     </section>
                     <section className="flex items-center justify-between">
-                        <button type="submit" disabled={processing} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer">Acceder</button>
+                        <button type="submit" disabled={processing} className="bg-blue-500 hover:bg-blue-700 border border-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer">Acceder</button>
                         <button type="button" className="inline-block align-baseline font-bold text-sm border border-red-500 p-2 rounded text-orange-500 hover:bg-yellow-500 hover:text-white cursor-pointer" onClick={cambiarFomulario}>¿Olvidó su contraseña?</button>
                     </section>
                 </form>
