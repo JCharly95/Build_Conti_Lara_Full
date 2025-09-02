@@ -31,7 +31,6 @@ return new class extends Migration
         Schema::create('sensor', function (Blueprint $table) {
             $table->id('ID_Sensor');
             $table->string('Nombre', length: 150);
-            $table->unsignedBigInteger('Tipo_ID');
         });
 
         // Check if the 'history_type_map' table exists before adding the foreign key
