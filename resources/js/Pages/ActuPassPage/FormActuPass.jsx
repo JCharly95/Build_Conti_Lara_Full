@@ -5,11 +5,11 @@ import Dialog from "../../Components/UI/Modal/Plantillas/Dialog";
 import DialogCancelar from "../../Components/UI/Modal/Plantillas/DialogCancel";
 import { Upload, Key, Eye, EyeOff } from "react-feather";
 
-/** Función para renderizar el formulario para la solicitud de recuperación de acceso
+/** Función para renderizar el formulario para la recuperación de acceso
  * @param {object} props - Objeto con las propiedades ingresadas para la visualización del formulario
  * @param {object} props.infoSes - Arreglo de datos con la información de la sesión
  * @param {string} props.procResp - Cadena de texto con la respuesta satisfactoria del proceso concluido
- * @returns {JSX.Element} Componente del formulario de solicitud para recuperación de acceso */
+ * @returns {JSX.Element} Componente del formulario para recuperación de acceso */
 export default function FormActuContra({ infoSes, procResp }){
     /* Variables de trabajo:
     Variable de estado para establecer tipo de campo en de la nueva contraseña
